@@ -1,7 +1,7 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class CreateUsersTable1761240000000 implements MigrationInterface {
-  name = 'CreateUsersTable1761240000000';
+  name = "CreateUsersTable1761240000000";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto"');
@@ -23,4 +23,3 @@ export class CreateUsersTable1761240000000 implements MigrationInterface {
     await queryRunner.query('DROP TABLE "users"');
   }
 }
-

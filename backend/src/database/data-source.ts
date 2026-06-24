@@ -14,7 +14,4 @@ const dataSourceOptions = buildTypeOrmOptions({
   database: process.env.DB_DATABASE,
 });
 
-export const appDataSource = new DataSource(dataSourceOptions);
-
-export default appDataSource;
-
+export default new DataSource(dataSourceOptions);
