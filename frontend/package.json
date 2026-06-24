@@ -1,0 +1,16 @@
+{
+  "name": "taskflow-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Initial frontend scaffold for TaskFlow",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "node scripts/server-placeholder.js development",
+    "build": "node scripts/build-placeholder.js frontend",
+    "start": "node scripts/server-placeholder.js production",
+    "lint": "node scripts/build-placeholder.js lint"
+  }
+}
+

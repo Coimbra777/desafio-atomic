@@ -1,0 +1,101 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: taskflow-postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - taskflow-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: taskflow-redis
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - taskflow-network
+
+  api:
+    container_name: taskflow-api
+    restart: unless-stopped
+    build:
+      context: ./backend
+      target: development
+    env_file:
+      - .env
+    environment:
+      PORT: ${API_PORT}
+    command: sh -c "npm install && npm run start:dev"
+    ports:
+      - "${API_PORT:-3001}:${API_PORT:-3001}"
+    volumes:
+      - ./backend:/usr/src/app
+      - backend_node_modules:/usr/src/app/node_modules
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - taskflow-network
+
+  worker:
+    container_name: taskflow-worker
+    restart: unless-stopped
+    build:
+      context: ./backend
+      target: development
+    env_file:
+      - .env
+    command: sh -c "npm install && npm run start:worker"
+    volumes:
+      - ./backend:/usr/src/app
+      - backend_node_modules:/usr/src/app/node_modules
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - taskflow-network
+
+  frontend:
+    container_name: taskflow-frontend
+    restart: unless-stopped
+    build:
+      context: ./frontend
+      target: development
+    env_file:
+      - .env
+    environment:
+      PORT: ${FRONTEND_PORT}
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "${FRONTEND_PORT:-3000}:${FRONTEND_PORT:-3000}"
+    volumes:
+      - ./frontend:/usr/src/app
+      - frontend_node_modules:/usr/src/app/node_modules
+    depends_on:
+      - api
+    networks:
+      - taskflow-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  backend_node_modules:
+  frontend_node_modules:
+
+networks:
+  taskflow-network:
+    driver: bridge
