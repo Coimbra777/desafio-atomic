@@ -4,6 +4,13 @@ import type {
   RegisterPayload,
   User,
 } from '@/types/auth';
+import type {
+  CreateTaskPayload,
+  Task,
+  TaskMovement,
+  UpdateTaskPayload,
+  UpdateTaskStatusPayload,
+} from '@/types/task';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
@@ -73,3 +80,65 @@ export function getCurrentUser(token: string): Promise<User> {
   });
 }
 
+export function getUsers(token: string): Promise<User[]> {
+  return request<User[]>('/users', {
+    token,
+  });
+}
+
+export function getTasks(token: string): Promise<Task[]> {
+  return request<Task[]>('/tasks', {
+    token,
+  });
+}
+
+export function createTask(
+  payload: CreateTaskPayload,
+  token: string,
+): Promise<Task> {
+  return request<Task>('/tasks', {
+    method: 'POST',
+    body: payload,
+    token,
+  });
+}
+
+export function updateTask(
+  id: string,
+  payload: UpdateTaskPayload,
+  token: string,
+): Promise<Task> {
+  return request<Task>(`/tasks/${id}`, {
+    method: 'PATCH',
+    body: payload,
+    token,
+  });
+}
+
+export function updateTaskStatus(
+  id: string,
+  payload: UpdateTaskStatusPayload,
+  token: string,
+): Promise<Task> {
+  return request<Task>(`/tasks/${id}/status`, {
+    method: 'PATCH',
+    body: payload,
+    token,
+  });
+}
+
+export function deleteTask(id: string, token: string): Promise<void> {
+  return request<void>(`/tasks/${id}`, {
+    method: 'DELETE',
+    token,
+  });
+}
+
+export function getTaskMovements(
+  id: string,
+  token: string,
+): Promise<TaskMovement[]> {
+  return request<TaskMovement[]>(`/tasks/${id}/movements`, {
+    token,
+  });
+}

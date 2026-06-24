@@ -4,7 +4,7 @@ TaskFlow e um MVP fullstack de gerenciamento de tarefas com Kanban, autenticacao
 
 ## Status atual
 
-Esta entrega cobre as Etapas 1, 2, 3, 4, 5 e 6 do plano:
+Esta entrega cobre as Etapas 1, 2, 3, 4, 5, 6 e 7 do plano:
 
 - estrutura inicial de `frontend/` e `backend/`;
 - `docker-compose.yml` com `postgres`, `redis`, `api`, `worker` e `frontend`;
@@ -13,14 +13,13 @@ Esta entrega cobre as Etapas 1, 2, 3, 4, 5 e 6 do plano:
 - `.env.example`;
 - README inicial;
 - backend real em NestJS com TypeORM, autenticacao JWT, usuarios, tasks, notificacoes assicronas e rota `GET /health`;
-- frontend base em Next.js com autenticacao simples e paginas protegidas.
+- frontend em Next.js com autenticacao simples, paginas protegidas e Kanban real.
 
 Ainda nao foram implementados:
 
-- Kanban real com drag and drop;
 - dashboard real e graficos.
 
-Os containers `api`, `worker` e `frontend` ja executam bases reais do projeto. No frontend, apenas `/login`, `/register`, `/kanban` e `/dashboard` fazem parte desta etapa.
+Os containers `api`, `worker` e `frontend` ja executam bases reais do projeto. No frontend, `/kanban` agora consome o backend real, usa drag and drop com `dnd-kit` e permite criar, editar e excluir tasks.
 
 ## Stack
 
@@ -105,7 +104,7 @@ As variaveis iniciais ficam em `.env.example` e cobrem:
 - Redis e BullMQ suportam a fila `email-notifications`.
 - O worker processa a fila separadamente da API e simula envio de e-mail via log.
 - Os Dockerfiles foram preparados em multi-stage para manter consistencia com o projeto de referencia.
-- O frontend usa Next.js App Router, Tailwind e persistencia simples do token em `localStorage`.
+- O frontend usa Next.js App Router, Tailwind, `dnd-kit` e persistencia simples do token em `localStorage`.
 
 ## Backend atual
 
@@ -183,16 +182,21 @@ Comportamento:
 - o token JWT e salvo em `localStorage`
 - `/kanban` e `/dashboard` redirecionam para `/login` quando nao ha sessao
 - `auth/me` valida a sessao ao abrir a area protegida
-- `/kanban` e `/dashboard` ainda sao placeholders visuais, sem Kanban real nem dashboard real
+- `/kanban` lista tasks reais, agrupa por status, permite drag and drop, cria/edita/exclui cards e mostra historico
+- `/dashboard` ainda e um placeholder visual
 
 Validacao manual sugerida:
 
 1. acesse `http://localhost:3000/register`
 2. crie um usuario novo
 3. confirme o redirecionamento para `/kanban`
-4. use o botao `Sair`
-5. faca login em `http://localhost:3000/login`
-6. acesse `http://localhost:3000/dashboard`
+4. clique em `Nova task` e crie um card
+5. arraste o card entre colunas e recarregue a pagina
+6. abra o card, edite os dados e confira o historico
+7. exclua o card
+8. use o botao `Sair`
+9. faca login em `http://localhost:3000/login`
+10. acesse `http://localhost:3000/dashboard`
 
 ## Tasks
 

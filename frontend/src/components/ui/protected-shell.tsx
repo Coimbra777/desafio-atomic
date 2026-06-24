@@ -47,7 +47,7 @@ export function ProtectedShell({
               Area autenticada
             </p>
             <h1 className="mt-2 font-display text-3xl text-ink">
-              TaskFlow Frontend Base
+              TaskFlow Workspace
             </h1>
           </div>
 
@@ -90,4 +90,3 @@ export function ProtectedShell({
     </main>
   );
 }
-
