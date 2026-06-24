@@ -4,7 +4,7 @@ TaskFlow e um MVP fullstack de gerenciamento de tarefas com Kanban, autenticacao
 
 ## Status atual
 
-Esta entrega cobre as Etapas 1, 2, 3, 4, 5, 6 e 7 do plano:
+Esta entrega cobre as Etapas 1, 2, 3, 4, 5, 6, 7 e 8 do plano:
 
 - estrutura inicial de `frontend/` e `backend/`;
 - `docker-compose.yml` com `postgres`, `redis`, `api`, `worker` e `frontend`;
@@ -12,12 +12,13 @@ Esta entrega cobre as Etapas 1, 2, 3, 4, 5, 6 e 7 do plano:
 - `Makefile` com comandos basicos de ambiente e migration;
 - `.env.example`;
 - README inicial;
-- backend real em NestJS com TypeORM, autenticacao JWT, usuarios, tasks, notificacoes assicronas e rota `GET /health`;
-- frontend em Next.js com autenticacao simples, paginas protegidas e Kanban real.
+- backend real em NestJS com TypeORM, autenticacao JWT, usuarios, tasks, dashboard simples, notificacoes assincronas e rota `GET /health`;
+- frontend em Next.js com autenticacao simples, paginas protegidas, Kanban real e dashboard analitico simples.
 
 Ainda nao foram implementados:
 
-- dashboard real e graficos.
+- melhorias avancadas de dashboard;
+- graficos mais detalhados e comparativos.
 
 Os containers `api`, `worker` e `frontend` ja executam bases reais do projeto. No frontend, `/kanban` agora consome o backend real, usa drag and drop com `dnd-kit` e permite criar, editar e excluir tasks.
 
@@ -104,7 +105,7 @@ As variaveis iniciais ficam em `.env.example` e cobrem:
 - Redis e BullMQ suportam a fila `email-notifications`.
 - O worker processa a fila separadamente da API e simula envio de e-mail via log.
 - Os Dockerfiles foram preparados em multi-stage para manter consistencia com o projeto de referencia.
-- O frontend usa Next.js App Router, Tailwind, `dnd-kit` e persistencia simples do token em `localStorage`.
+- O frontend usa Next.js App Router, Tailwind, `dnd-kit`, `recharts` e persistencia simples do token em `localStorage`.
 
 ## Backend atual
 
@@ -119,6 +120,7 @@ Na Etapa 2, o backend passou a ter:
 - `AuthModule` com `POST /auth/register`, `POST /auth/login` e `GET /auth/me`;
 - `UsersModule` com `GET /users` protegido por JWT;
 - `TasksModule` com CRUD, mudanca de status e historico de movimentacoes;
+- `DashboardModule` com `GET /dashboard/summary`;
 - `NotificationsModule` com publisher BullMQ e worker separado;
 - `Helmet`, `CORS` e `ValidationPipe` global;
 - `GET /health`.
@@ -183,7 +185,7 @@ Comportamento:
 - `/kanban` e `/dashboard` redirecionam para `/login` quando nao ha sessao
 - `auth/me` valida a sessao ao abrir a area protegida
 - `/kanban` lista tasks reais, agrupa por status, permite drag and drop, cria/edita/exclui cards e mostra historico
-- `/dashboard` ainda e um placeholder visual
+- `/dashboard` consome `GET /dashboard/summary`, aplica filtro simples por periodo e exibe graficos reais
 
 Validacao manual sugerida:
 
@@ -197,6 +199,7 @@ Validacao manual sugerida:
 8. use o botao `Sair`
 9. faca login em `http://localhost:3000/login`
 10. acesse `http://localhost:3000/dashboard`
+11. aplique um filtro por periodo e confira os graficos
 
 ## Tasks
 
@@ -244,6 +247,41 @@ Valores aceitos pela API:
 ### Listar movimentacoes
 
 `GET /tasks/:id/movements`
+
+## Dashboard
+
+Todas as rotas do dashboard exigem:
+
+```txt
+Authorization: Bearer TOKEN_JWT
+```
+
+### Resumo
+
+`GET /dashboard/summary`
+
+Query params opcionais:
+
+```txt
+startDate=2026-06-01
+endDate=2026-06-30
+```
+
+Retorna:
+
+- cards por status
+- tarefas por responsavel
+- total de tarefas atrasadas
+- conclusoes por dia
+
+Validacao manual sugerida:
+
+1. crie algumas tasks em `/kanban`
+2. mova pelo menos uma para `Concluido`
+3. acesse `http://localhost:3000/dashboard`
+4. confira os cards resumo
+5. aplique um filtro por periodo
+6. confirme que os graficos refletem os dados reais
 
 ## Notificacoes
 

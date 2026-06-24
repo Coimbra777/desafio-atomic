@@ -1,6 +1,7 @@
 .env
 node_modules
 dist
+dist-docker
 .next
 .next-docker
 coverage

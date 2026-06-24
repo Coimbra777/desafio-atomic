@@ -5,6 +5,10 @@ import type {
   User,
 } from '@/types/auth';
 import type {
+  DashboardSummary,
+  DashboardSummaryFilters,
+} from '@/types/dashboard';
+import type {
   CreateTaskPayload,
   Task,
   TaskMovement,
@@ -141,4 +145,28 @@ export function getTaskMovements(
   return request<TaskMovement[]>(`/tasks/${id}/movements`, {
     token,
   });
+}
+
+export function getDashboardSummary(
+  token: string,
+  filters: DashboardSummaryFilters = {},
+): Promise<DashboardSummary> {
+  const searchParams = new URLSearchParams();
+
+  if (filters.startDate) {
+    searchParams.set('startDate', filters.startDate);
+  }
+
+  if (filters.endDate) {
+    searchParams.set('endDate', filters.endDate);
+  }
+
+  const query = searchParams.toString();
+
+  return request<DashboardSummary>(
+    `/dashboard/summary${query.length > 0 ? `?${query}` : ''}`,
+    {
+      token,
+    },
+  );
 }
