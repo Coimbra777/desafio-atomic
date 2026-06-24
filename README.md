@@ -4,7 +4,7 @@ TaskFlow e um MVP fullstack de gerenciamento de tarefas com Kanban, autenticacao
 
 ## Status atual
 
-Esta entrega cobre as Etapas 1, 2, 3, 4 e 5 do plano:
+Esta entrega cobre as Etapas 1, 2, 3, 4, 5 e 6 do plano:
 
 - estrutura inicial de `frontend/` e `backend/`;
 - `docker-compose.yml` com `postgres`, `redis`, `api`, `worker` e `frontend`;
@@ -12,16 +12,17 @@ Esta entrega cobre as Etapas 1, 2, 3, 4 e 5 do plano:
 - `Makefile` com comandos basicos de ambiente e migration;
 - `.env.example`;
 - README inicial;
-- backend real em NestJS com TypeORM, autenticacao JWT, usuarios, tasks, notificacoes assicronas e rota `GET /health`.
+- backend real em NestJS com TypeORM, autenticacao JWT, usuarios, tasks, notificacoes assicronas e rota `GET /health`;
+- frontend base em Next.js com autenticacao simples e paginas protegidas.
 
 Ainda nao foram implementados:
 
-- dashboard;
-- base Next.js.
+- Kanban real com drag and drop;
+- dashboard real e graficos.
 
-O container `api` ja executa a base real do NestJS. `worker` e `frontend` continuam como placeholders ate as proximas etapas.
+Os containers `api`, `worker` e `frontend` ja executam bases reais do projeto. No frontend, apenas `/login`, `/register`, `/kanban` e `/dashboard` fazem parte desta etapa.
 
-## Stack planejada
+## Stack
 
 - Frontend: Next.js + React + TypeScript
 - Backend: NestJS + TypeScript
@@ -104,6 +105,7 @@ As variaveis iniciais ficam em `.env.example` e cobrem:
 - Redis e BullMQ suportam a fila `email-notifications`.
 - O worker processa a fila separadamente da API e simula envio de e-mail via log.
 - Os Dockerfiles foram preparados em multi-stage para manter consistencia com o projeto de referencia.
+- O frontend usa Next.js App Router, Tailwind e persistencia simples do token em `localStorage`.
 
 ## Backend atual
 
@@ -165,6 +167,32 @@ Header:
 ```txt
 Authorization: Bearer TOKEN_JWT
 ```
+
+## Frontend
+
+Rotas entregues nesta etapa:
+
+- `/login`
+- `/register`
+- `/kanban`
+- `/dashboard`
+
+Comportamento:
+
+- `login` e `register` usam os endpoints reais do backend
+- o token JWT e salvo em `localStorage`
+- `/kanban` e `/dashboard` redirecionam para `/login` quando nao ha sessao
+- `auth/me` valida a sessao ao abrir a area protegida
+- `/kanban` e `/dashboard` ainda sao placeholders visuais, sem Kanban real nem dashboard real
+
+Validacao manual sugerida:
+
+1. acesse `http://localhost:3000/register`
+2. crie um usuario novo
+3. confirme o redirecionamento para `/kanban`
+4. use o botao `Sair`
+5. faca login em `http://localhost:3000/login`
+6. acesse `http://localhost:3000/dashboard`
 
 ## Tasks
 
@@ -249,12 +277,13 @@ docker compose logs --tail=120 worker
 
 ## Trade-offs desta etapa
 
-- A base Next.js ainda nao foi criada para respeitar a separacao definida no `PLAN.md`.
 - A autenticacao foi mantida simples, sem refresh token, roles ou permissoes avancadas.
 - O fluxo de usuarios foi mantido enxuto, retornando sempre o usuario sem `passwordHash`.
 - Tasks usam delete fisico simples e historico apenas na rota especifica de mudanca de status.
 - O envio de e-mail continua simulado por `console.log`, sem SMTP real.
+- O frontend salva o token localmente para manter o MVP simples.
+- `/kanban` e `/dashboard` ainda sao placeholders autenticados, sem implementacao funcional.
 
 ## Proximas etapas
 
-- Dashboard e frontend Kanban
+- Kanban real, dashboard real e drag and drop

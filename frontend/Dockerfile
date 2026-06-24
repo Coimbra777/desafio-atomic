@@ -20,6 +20,8 @@ FROM base AS production
 ENV NODE_ENV=production
 COPY package*.json ./
 RUN npm install --omit=dev
-COPY . .
+COPY --from=builder /usr/src/app/.next ./.next
+COPY --from=builder /usr/src/app/public ./public
+COPY --from=builder /usr/src/app/next.config.mjs ./next.config.mjs
+COPY --from=builder /usr/src/app/package*.json ./
 CMD ["npm", "run", "start"]
-

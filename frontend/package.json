@@ -2,15 +2,29 @@
   "name": "taskflow-frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "Initial frontend scaffold for TaskFlow",
+  "description": "TaskFlow frontend with Next.js and Tailwind",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "node scripts/server-placeholder.js development",
-    "build": "node scripts/build-placeholder.js frontend",
-    "start": "node scripts/server-placeholder.js production",
-    "lint": "node scripts/build-placeholder.js lint"
+    "dev": "next dev --hostname 0.0.0.0 --port 3000",
+    "build": "next build",
+    "start": "next start -H 0.0.0.0 -p 3000",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^14.2.30",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.16.5",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.10",
+    "typescript": "^5.8.3"
   }
 }
 
