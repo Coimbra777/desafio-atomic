@@ -1,26 +1,46 @@
 # TaskFlow
 
-TaskFlow e um MVP fullstack de gerenciamento de tarefas com Kanban, autenticacao, dashboard simples e notificacoes assincronas via fila. Este repositorio segue o case tecnico descrito em `SPEC.md`, com execucao incremental definida em `PLAN.md`.
+TaskFlow e um MVP fullstack de gerenciamento de tarefas com autenticacao, Kanban, dashboard simples e notificacoes assincronas. O projeto segue o escopo definido em `SPEC.md` e a execucao incremental descrita em `PLAN.md`.
 
-## Status atual
+## Status do case
 
-Esta entrega cobre as Etapas 1, 2, 3, 4, 5, 6, 7 e 8 do plano:
+Etapas implementadas:
 
-- estrutura inicial de `frontend/` e `backend/`;
-- `docker-compose.yml` com `postgres`, `redis`, `api`, `worker` e `frontend`;
-- Dockerfiles multi-stage com `base`, `development`, `builder` e `production`;
-- `Makefile` com comandos basicos de ambiente e migration;
-- `.env.example`;
-- README inicial;
-- backend real em NestJS com TypeORM, autenticacao JWT, usuarios, tasks, dashboard simples, notificacoes assincronas e rota `GET /health`;
-- frontend em Next.js com autenticacao simples, paginas protegidas, Kanban real e dashboard analitico simples.
+- backend NestJS com TypeORM, JWT, healthcheck e modulos por dominio;
+- frontend Next.js com login, register, Kanban e dashboard;
+- PostgreSQL, Redis, BullMQ e worker separado;
+- Docker Compose, Dockerfiles multi-stage, Makefile e `.env.example`.
 
-Ainda nao foram implementados:
+Implementado nesta entrega:
 
-- melhorias avancadas de dashboard;
-- graficos mais detalhados e comparativos.
+- `POST /auth/register`
+- `POST /auth/login`
+- `GET /auth/me`
+- `GET /users`
+- `GET /health`
+- `GET /tasks`
+- `POST /tasks`
+- `GET /tasks/:id`
+- `PATCH /tasks/:id`
+- `DELETE /tasks/:id`
+- `PATCH /tasks/:id/status`
+- `GET /tasks/:id/movements`
+- `GET /dashboard/summary`
+- fila `email-notifications`
+- worker com processamento separado e log simulando envio de e-mail
+- frontend protegido com token salvo em `localStorage`
+- Kanban com drag and drop via `dnd-kit`
+- dashboard com filtros simples e graficos via `recharts`
 
-Os containers `api`, `worker` e `frontend` ja executam bases reais do projeto. No frontend, `/kanban` agora consome o backend real, usa drag and drop com `dnd-kit` e permite criar, editar e excluir tasks.
+Nao implementado:
+
+- refresh token
+- RBAC/permissoes avancadas
+- upload de anexos
+- WebSocket
+- SMTP real
+- dashboard avancado com comparativos mais ricos
+- testes E2E extensos
 
 ## Stack
 
@@ -28,10 +48,11 @@ Os containers `api`, `worker` e `frontend` ja executam bases reais do projeto. N
 - Backend: NestJS + TypeScript
 - ORM: TypeORM
 - Banco: PostgreSQL
-- Cache/fila: Redis + BullMQ
+- Fila: BullMQ
+- Cache/infra de fila: Redis
 - Infra local: Docker Compose
 
-## Estrutura inicial
+## Estrutura
 
 ```txt
 taskflow/
@@ -46,7 +67,7 @@ taskflow/
   .env.example
 ```
 
-## Como executar
+## Como executar com Docker
 
 1. Crie o arquivo de ambiente:
 
@@ -54,24 +75,57 @@ taskflow/
 cp .env.example .env
 ```
 
-2. Suba os containers:
+2. Suba tudo:
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
-Ou:
+3. Confira os servicos:
 
 ```bash
-make setup
+docker compose ps
 ```
 
-## Servicos
+Servicos esperados:
 
 - Frontend: `http://localhost:3000`
 - Backend: `http://localhost:3001`
 - Postgres: `localhost:5432`
 - Redis: `localhost:6379`
+
+## Como executar localmente
+
+Requisito: manter PostgreSQL e Redis disponiveis. O caminho mais simples e subir so a infra com Docker:
+
+```bash
+cp .env.example .env
+docker compose up -d postgres redis
+```
+
+Backend:
+
+```bash
+cd backend
+npm install
+npm run start:dev
+```
+
+Frontend:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Worker:
+
+```bash
+cd backend
+npm install
+npm run start:worker
+```
 
 ## Comandos uteis
 
@@ -89,47 +143,63 @@ make migrate
 
 ## Variaveis de ambiente
 
-As variaveis iniciais ficam em `.env.example` e cobrem:
+As variaveis base estao em `.env.example`.
 
-- portas do frontend e backend;
-- URL publica do frontend;
-- conexao com PostgreSQL;
-- conexao com Redis;
-- portas publicadas de Postgres e Redis no host;
-- configuracao futura de JWT;
-- credenciais futuras de seed.
+Principais:
 
-## Decisoes tecnicas
+- `API_PORT`
+- `FRONTEND_PORT`
+- `FRONTEND_URL`
+- `NEXT_PUBLIC_API_URL`
+- `DB_HOST`
+- `DB_PORT`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `DB_DATABASE`
+- `DATABASE_URL`
+- `REDIS_HOST`
+- `REDIS_PORT`
+- `JWT_SECRET`
+- `JWT_EXPIRES_IN`
 
-- PostgreSQL foi escolhido para seguir a especificacao do case.
-- Redis e BullMQ suportam a fila `email-notifications`.
-- O worker processa a fila separadamente da API e simula envio de e-mail via log.
-- Os Dockerfiles foram preparados em multi-stage para manter consistencia com o projeto de referencia.
-- O frontend usa Next.js App Router, Tailwind, `dnd-kit`, `recharts` e persistencia simples do token em `localStorage`.
+Observacoes:
 
-## Backend atual
+- `.env` nao deve ser commitado
+- o repositorio nao contem secrets reais
 
-Na Etapa 2, o backend passou a ter:
+## Endpoints principais
 
-- NestJS real no diretorio `backend/`;
-- `ConfigModule` global;
-- `TypeOrmModule.forRootAsync` com PostgreSQL;
-- `src/database/data-source.ts` para futuras migrations;
-- padrao de persistencia baseado em TypeORM, sem Prisma;
-- `entities` por modulo e `src/database/migrations` como estrutura oficial para evolucao do banco;
-- `AuthModule` com `POST /auth/register`, `POST /auth/login` e `GET /auth/me`;
-- `UsersModule` com `GET /users` protegido por JWT;
-- `TasksModule` com CRUD, mudanca de status e historico de movimentacoes;
-- `DashboardModule` com `GET /dashboard/summary`;
-- `NotificationsModule` com publisher BullMQ e worker separado;
-- `Helmet`, `CORS` e `ValidationPipe` global;
-- `GET /health`.
+Health:
 
-## Autenticacao
+- `GET /health`
 
-### Register
+Auth:
 
-`POST /auth/register`
+- `POST /auth/register`
+- `POST /auth/login`
+- `GET /auth/me`
+
+Users:
+
+- `GET /users`
+
+Tasks:
+
+- `GET /tasks`
+- `POST /tasks`
+- `GET /tasks/:id`
+- `PATCH /tasks/:id`
+- `DELETE /tasks/:id`
+- `PATCH /tasks/:id/status`
+- `GET /tasks/:id/movements`
+
+Dashboard:
+
+- `GET /dashboard/summary`
+
+## Payloads de exemplo
+
+Register:
 
 ```json
 {
@@ -139,9 +209,7 @@ Na Etapa 2, o backend passou a ter:
 }
 ```
 
-### Login
-
-`POST /auth/login`
+Login:
 
 ```json
 {
@@ -150,73 +218,7 @@ Na Etapa 2, o backend passou a ter:
 }
 ```
 
-Resposta esperada:
-
-```json
-{
-  "access_token": "TOKEN_JWT",
-  "token_type": "Bearer"
-}
-```
-
-### Auth me
-
-`GET /auth/me`
-
-Header:
-
-```txt
-Authorization: Bearer TOKEN_JWT
-```
-
-## Frontend
-
-Rotas entregues nesta etapa:
-
-- `/login`
-- `/register`
-- `/kanban`
-- `/dashboard`
-
-Comportamento:
-
-- `login` e `register` usam os endpoints reais do backend
-- o token JWT e salvo em `localStorage`
-- `/kanban` e `/dashboard` redirecionam para `/login` quando nao ha sessao
-- `auth/me` valida a sessao ao abrir a area protegida
-- `/kanban` lista tasks reais, agrupa por status, permite drag and drop, cria/edita/exclui cards e mostra historico
-- `/dashboard` consome `GET /dashboard/summary`, aplica filtro simples por periodo e exibe graficos reais
-
-Validacao manual sugerida:
-
-1. acesse `http://localhost:3000/register`
-2. crie um usuario novo
-3. confirme o redirecionamento para `/kanban`
-4. clique em `Nova task` e crie um card
-5. arraste o card entre colunas e recarregue a pagina
-6. abra o card, edite os dados e confira o historico
-7. exclua o card
-8. use o botao `Sair`
-9. faca login em `http://localhost:3000/login`
-10. acesse `http://localhost:3000/dashboard`
-11. aplique um filtro por periodo e confira os graficos
-
-## Tasks
-
-Todas as rotas de tasks exigem:
-
-```txt
-Authorization: Bearer TOKEN_JWT
-```
-
-Valores aceitos pela API:
-
-- `status`: `todo`, `in_progress`, `in_review`, `done`
-- `priority`: `low`, `medium`, `high`
-
-### Criar task
-
-`POST /tasks`
+Criar task:
 
 ```json
 {
@@ -230,13 +232,7 @@ Valores aceitos pela API:
 }
 ```
 
-### Listar tasks
-
-`GET /tasks`
-
-### Atualizar status
-
-`PATCH /tasks/:id/status`
+Atualizar status:
 
 ```json
 {
@@ -244,52 +240,36 @@ Valores aceitos pela API:
 }
 ```
 
-### Listar movimentacoes
-
-`GET /tasks/:id/movements`
-
-## Dashboard
-
-Todas as rotas do dashboard exigem:
+Dashboard com filtro:
 
 ```txt
-Authorization: Bearer TOKEN_JWT
+GET /dashboard/summary?startDate=2026-06-01&endDate=2026-06-30
 ```
 
-### Resumo
+## Frontend
 
-`GET /dashboard/summary`
+Rotas implementadas:
 
-Query params opcionais:
+- `/login`
+- `/register`
+- `/kanban`
+- `/dashboard`
 
-```txt
-startDate=2026-06-01
-endDate=2026-06-30
-```
+Comportamento:
 
-Retorna:
+- `login` e `register` usam o backend real
+- o token JWT fica em `localStorage`
+- `/kanban` e `/dashboard` exigem sessao
+- o Kanban lista tasks reais, cria, edita, exclui e move cards
+- o dashboard consome `GET /dashboard/summary` e exibe dados reais
 
-- cards por status
-- tarefas por responsavel
-- total de tarefas atrasadas
-- conclusoes por dia
+## Notificacoes assincronas
 
-Validacao manual sugerida:
-
-1. crie algumas tasks em `/kanban`
-2. mova pelo menos uma para `Concluido`
-3. acesse `http://localhost:3000/dashboard`
-4. confira os cards resumo
-5. aplique um filtro por periodo
-6. confirme que os graficos refletem os dados reais
-
-## Notificacoes
-
-Fila usada pela API e pelo worker:
+Fila:
 
 - `email-notifications`
 
-Eventos que geram job:
+Eventos publicados pela API:
 
 - criacao de task com `assigneeId`
 - alteracao de `assigneeId`
@@ -301,31 +281,49 @@ Exemplo de log esperado no worker:
 [EmailWorker][task_status_changed] Sending notification to user@email.com: Task "Preparar quadro inicial" changed status to in_progress
 ```
 
-Validacao rapida da fila:
+## Decisoes tecnicas
 
-1. Suba os servicos:
+- TypeORM foi mantido para seguir o padrao do projeto de referencia e a estrutura pedida no case.
+- PostgreSQL substitui SQL Server para alinhar com a especificacao.
+- BullMQ + Redis substituem RabbitMQ e MongoDB para simplificar a fila.
+- O backend foi dividido em modulos pequenos: `auth`, `users`, `tasks`, `dashboard`, `notifications`, `health`.
+- O frontend usa App Router e uma camada minima de client de API, sem adicionar gerenciamento de estado mais pesado.
+- O token foi salvo localmente para manter o fluxo simples e funcional no MVP.
 
-```bash
-docker compose up -d --build api worker
-```
+## Trade-offs
 
-2. Crie uma task com `assigneeId`.
-3. Altere o status da task.
-4. Veja os logs do worker:
+- autenticacao sem refresh token
+- sem permissoes avancadas
+- delete fisico de tasks
+- historico registrado apenas na rota de mudanca de status
+- notificacao simulada por log em vez de SMTP real
+- dashboard com agregacoes simples, sem comparativos complexos
+- sem WebSocket; atualizacao e por reload ou nova consulta
+
+## Validacao manual sugerida
+
+1. Acesse `http://localhost:3000/register`
+2. Crie um usuario
+3. Confirme o redirecionamento para `/kanban`
+4. Crie uma task
+5. Edite a task
+6. Arraste a task entre colunas
+7. Recarregue a pagina para confirmar persistencia
+8. Exclua a task
+9. Acesse `/dashboard`
+10. Confira os cards e os graficos
+11. Aplique filtro por periodo
+12. Veja os logs do worker com:
 
 ```bash
 docker compose logs --tail=120 worker
 ```
 
-## Trade-offs desta etapa
+## Melhorias futuras
 
-- A autenticacao foi mantida simples, sem refresh token, roles ou permissoes avancadas.
-- O fluxo de usuarios foi mantido enxuto, retornando sempre o usuario sem `passwordHash`.
-- Tasks usam delete fisico simples e historico apenas na rota especifica de mudanca de status.
-- O envio de e-mail continua simulado por `console.log`, sem SMTP real.
-- O frontend salva o token localmente para manter o MVP simples.
-- `/kanban` e `/dashboard` ainda sao placeholders autenticados, sem implementacao funcional.
-
-## Proximas etapas
-
-- Kanban real, dashboard real e drag and drop
+- refresh token
+- anexos
+- dashboard com mais cortes analiticos
+- testes automatizados mais amplos
+- envio real de e-mail
+- atualizacao em tempo real
