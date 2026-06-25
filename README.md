@@ -221,7 +221,7 @@ O script consulta o banco, filtra tasks não concluídas com `dueDate` entre ago
 
 **Migrations e seed no boot** — facilita avaliação local. Em produção, migrations rodariam em etapa controlada de deploy.
 
-**Testes** — não há testes automatizados neste MVP. O foco foi na arquitetura e no fluxo completo. Em produção, testes unitários nos serviços e e2e nos endpoints seriam prioritários.
+**Testes automatizados** — nesta versão, a prioridade foi entregar o fluxo completo da aplicação: autenticação, Kanban, dashboard, fila assíncrona e worker separado. Como evolução imediata, eu adicionaria testes unitários para `AuthService`, `TasksService` e `NotificationsProcessor`, além de testes e2e para os fluxos de login, criação de task, movimentação de status e geração de notificações.
 
 **Sem WebSocket** — o Kanban não atualiza em tempo real entre múltiplos usuários.
 
