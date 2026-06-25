@@ -48,8 +48,9 @@ export class TasksController {
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() payload: UpdateTaskDto,
+    @CurrentUser() currentUser: AuthenticatedUser,
   ): Promise<TaskResponse> {
-    return this.tasksService.update(id, payload);
+    return this.tasksService.update(id, payload, currentUser);
   }
 
   @Delete(':id')

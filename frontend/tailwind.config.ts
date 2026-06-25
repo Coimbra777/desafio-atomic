@@ -5,6 +5,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        app: '#f1f3f5',
         paper: '#f4efe5',
         ink: '#1b1f1d',
         ember: '#ad5d3d',
@@ -12,19 +13,18 @@ const config: Config = {
         sand: '#e4d7bf',
         mist: '#c9d6d1',
       },
-      boxShadow: {
-        card: '0 24px 50px rgba(27, 31, 29, 0.14)',
-      },
-      borderRadius: {
-        xl2: '1.5rem',
-      },
-      backgroundImage: {
-        'hero-grid':
-          'radial-gradient(circle at top left, rgba(173, 93, 61, 0.16), transparent 28%), radial-gradient(circle at bottom right, rgba(40, 89, 77, 0.18), transparent 30%)',
-      },
       fontFamily: {
-        display: ['"Trebuchet MS"', '"Avenir Next"', 'ui-sans-serif', 'sans-serif'],
-        body: ['"Iowan Old Style"', 'Georgia', 'ui-serif', 'serif'],
+        sans: ['var(--font-inter)', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['var(--font-inter)', 'Inter', 'ui-sans-serif', 'sans-serif'],
+        body: ['var(--font-inter)', 'Inter', 'ui-sans-serif', 'sans-serif'],
+      },
+      boxShadow: {
+        card: '0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.05)',
+        'card-hover': '0 4px 16px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06)',
+        panel: '0 1px 2px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04)',
+      },
+      borderColor: {
+        DEFAULT: 'rgba(27,31,29,0.10)',
       },
     },
   },

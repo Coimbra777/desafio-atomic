@@ -87,7 +87,7 @@ export class DashboardService {
         .createQueryBuilder('task')
         .leftJoin('task.assignee', 'assignee')
         .select('task.assigneeId', 'assigneeId')
-        .addSelect("COALESCE(assignee.name, 'Nao atribuido')", 'assigneeName')
+        .addSelect("COALESCE(assignee.name, 'Não atribuído')", 'assigneeName')
         .addSelect('COUNT(task.id)', 'count')
         .groupBy('task.assigneeId')
         .addGroupBy('assignee.name')

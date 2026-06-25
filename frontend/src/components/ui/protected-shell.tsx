@@ -10,7 +10,7 @@ type ProtectedShellProps = {
   children: React.ReactNode;
 };
 
-const links = [
+const navLinks = [
   { href: '/kanban', label: 'Kanban' },
   { href: '/dashboard', label: 'Dashboard' },
 ];
@@ -30,39 +30,71 @@ export function ProtectedShell({
 
   if (status !== 'authenticated' || !user) {
     return (
-      <main className="flex min-h-screen items-center justify-center px-6">
-        <div className="panel-surface rounded-xl2 px-6 py-4 text-sm text-ink/70">
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="rounded-lg border border-ink/10 bg-white px-6 py-4 text-sm text-ink/60 shadow-panel">
           Validando acesso...
         </div>
-      </main>
+      </div>
     );
   }
 
-  return (
-    <main className="min-h-screen px-4 py-5 sm:px-6 lg:px-8">
-      <header className="panel-surface mx-auto flex w-full max-w-[1500px] flex-col gap-6 rounded-[2rem] px-5 py-5 sm:px-7">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-          <div>
-            <p className="font-display text-[0.7rem] uppercase tracking-[0.35em] text-pine">
-              Workspace autenticado
-            </p>
-            <h1 className="mt-2 font-display text-3xl text-ink sm:text-4xl">
-              TaskFlow Board
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/60">
-              Fluxo simples de trabalho com autenticacao, Kanban, dashboard e notificacoes assincronas.
-            </p>
-          </div>
+  const initials = user.name
+    .split(' ')
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <div className="rounded-[1.25rem] border border-ink/10 bg-[#f8fafb] px-4 py-3 text-sm text-ink/75">
-              <p className="font-semibold text-ink">{user.name}</p>
-              <p className="mt-1 text-xs uppercase tracking-[0.18em] text-ink/45">
-                {user.email}
-              </p>
+  return (
+    <div className="min-h-screen">
+      {/* ── Sticky top bar ──────────────────────────────────────────── */}
+      <header className="sticky top-0 z-40 border-b border-ink/8 bg-white/95 backdrop-blur-sm">
+        <div className="mx-auto flex h-14 max-w-screen-2xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+          {/* Logo */}
+          <Link href="/kanban" className="flex items-center gap-2.5 shrink-0">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-pine">
+              <span className="text-[0.6rem] font-bold tracking-tight text-white">TF</span>
+            </div>
+            <span className="hidden text-sm font-semibold text-ink sm:block">TaskFlow</span>
+          </Link>
+
+          {/* Divider */}
+          <div className="hidden h-5 w-px bg-ink/10 sm:block" />
+
+          {/* Nav */}
+          <nav className="flex items-center gap-0.5">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-pine/10 text-pine'
+                      : 'text-ink/55 hover:bg-ink/5 hover:text-ink'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* User area */}
+          <div className="flex items-center gap-3">
+            <div className="hidden text-right sm:block">
+              <p className="text-xs font-medium leading-tight text-ink">{user.name}</p>
+              <p className="text-[0.65rem] leading-tight text-ink/45">{user.email}</p>
+            </div>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-pine/15 ring-2 ring-white">
+              <span className="text-xs font-semibold text-pine">{initials}</span>
             </div>
             <button
-              className="rounded-[1.1rem] border border-ink/10 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-sand/35"
+              className="rounded-lg border border-ink/10 bg-white px-3 py-1.5 text-xs font-medium text-ink/65 transition hover:bg-ink/5 hover:text-ink"
               onClick={() => signOut()}
               type="button"
             >
@@ -70,29 +102,12 @@ export function ProtectedShell({
             </button>
           </div>
         </div>
-
-        <nav className="flex flex-wrap gap-3">
-          {links.map((link) => {
-            const isActive = pathname === link.href;
-
-            return (
-              <Link
-                key={link.href}
-                className={`rounded-[1.1rem] px-4 py-3 text-sm font-display uppercase tracking-[0.18em] transition ${
-                  isActive
-                    ? 'bg-pine text-white shadow-card'
-                    : 'border border-ink/10 bg-white text-ink hover:bg-sand/35'
-                }`}
-                href={link.href}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
       </header>
 
-      <div className="mx-auto mt-6 w-full max-w-[1500px]">{children}</div>
-    </main>
+      {/* ── Page content ────────────────────────────────────────────── */}
+      <main className="mx-auto max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-8">
+        {children}
+      </main>
+    </div>
   );
 }

@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 
 import { getTaskMovements } from '@/lib/api';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { StatusBadge } from '@/components/ui/badge';
 import type { User } from '@/types/auth';
 import type {
   CreateTaskPayload,
@@ -43,14 +46,10 @@ const initialFormState: FormState = {
 };
 
 function toLocalDateTimeInput(value: string | null): string {
-  if (!value) {
-    return '';
-  }
-
+  if (!value) return '';
   const date = new Date(value);
   const offset = date.getTimezoneOffset();
   const localDate = new Date(date.getTime() - offset * 60_000);
-
   return localDate.toISOString().slice(0, 16);
 }
 
@@ -70,6 +69,12 @@ function formatMovementDate(value: string): string {
     minute: '2-digit',
   }).format(new Date(value));
 }
+
+const inputClass =
+  'w-full rounded-lg border border-ink/12 bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition focus:border-pine focus:ring-2 focus:ring-pine/15 placeholder:text-ink/30';
+
+const labelClass = 'grid gap-1.5 text-sm';
+const labelTextClass = 'text-xs font-medium text-ink/55';
 
 export function TaskModal({
   mode,
@@ -117,7 +122,6 @@ export function TaskModal({
 
     async function loadMovements(): Promise<void> {
       setHistoryLoading(true);
-
       try {
         const payload = await getTaskMovements(taskId, token);
         setMovements(payload);
@@ -125,7 +129,7 @@ export function TaskModal({
         setError(
           movementError instanceof Error
             ? movementError.message
-            : 'Nao foi possivel carregar o historico.',
+            : 'Não foi possível carregar o histórico.',
         );
       } finally {
         setHistoryLoading(false);
@@ -139,10 +143,7 @@ export function TaskModal({
     field: Key,
     value: FormState[Key],
   ): void {
-    setFormState((current) => ({
-      ...current,
-      [field]: value,
-    }));
+    setFormState((current) => ({ ...current, [field]: value }));
   }
 
   function buildPayload(): CreateTaskPayload | UpdateTaskPayload {
@@ -190,7 +191,7 @@ export function TaskModal({
       setError(
         submitError instanceof Error
           ? submitError.message
-          : 'Nao foi possivel salvar a task.',
+          : 'Não foi possível salvar a task.',
       );
     } finally {
       setSubmitLoading(false);
@@ -198,10 +199,7 @@ export function TaskModal({
   }
 
   async function handleDelete(): Promise<void> {
-    if (!task) {
-      return;
-    }
-
+    if (!task) return;
     setError(null);
     setDeleteLoading(true);
 
@@ -212,7 +210,7 @@ export function TaskModal({
       setError(
         deleteError instanceof Error
           ? deleteError.message
-          : 'Nao foi possivel excluir a task.',
+          : 'Não foi possível excluir a task.',
       );
     } finally {
       setDeleteLoading(false);
@@ -220,25 +218,28 @@ export function TaskModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[rgba(20,27,31,0.4)] px-4 py-8 backdrop-blur-sm">
-      <div className="panel-surface w-full max-w-6xl rounded-[2rem] p-5 sm:p-6">
-        <div className="flex flex-col gap-4 border-b border-ink/10 pb-5 lg:flex-row lg:items-start lg:justify-between">
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/30 px-4 py-8 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="w-full max-w-5xl rounded-2xl bg-white shadow-card-hover">
+        {/* ── Modal header ──────────────────────────────────────────── */}
+        <div className="flex items-start justify-between gap-4 border-b border-ink/8 px-6 py-5">
           <div>
-            <p className="font-display text-xs uppercase tracking-[0.3em] text-pine">
+            <p className="text-xs font-semibold uppercase tracking-widest text-pine">
               {mode === 'create' ? 'Nova task' : 'Editar task'}
             </p>
-            <h2 className="mt-2 font-display text-3xl text-ink">
-              {mode === 'create' ? 'Preencha os dados do card' : task?.title}
+            <h2 className="mt-1 text-xl font-bold tracking-tight text-ink">
+              {mode === 'create' ? 'Criar novo card' : (task?.title ?? '')}
             </h2>
-            <p className="mt-2 text-sm text-ink/70">
-              {mode === 'create'
-                ? 'As tasks criadas aqui entram no fluxo do Kanban e podem ser movidas por drag and drop.'
-                : 'Atualize os dados da task, veja o historico e exclua o card se necessario.'}
-            </p>
+            {mode === 'edit' && task ? (
+              <div className="mt-2">
+                <StatusBadge status={task.status} />
+              </div>
+            ) : null}
           </div>
-
           <button
-            className="rounded-[1rem] border border-ink/10 bg-white px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-sand/30"
+            className="rounded-lg border border-ink/10 bg-white px-3 py-1.5 text-xs font-medium text-ink/60 transition hover:bg-ink/5 hover:text-ink"
             onClick={onClose}
             type="button"
           >
@@ -246,206 +247,227 @@ export function TaskModal({
           </button>
         </div>
 
-        <div className="mt-6 grid gap-6 xl:grid-cols-[1.25fr,0.9fr]">
-          <form className="grid gap-4" onSubmit={handleSubmit}>
-            <div className="rounded-[1.4rem] border border-ink/10 bg-[#f8fafb] p-4">
-              <p className="font-display text-xs uppercase tracking-[0.22em] text-ink/55">
-                Conteudo
-              </p>
-              <div className="mt-4 grid gap-4">
-            <label className="grid gap-2 text-sm text-ink">
-              <span className="font-display text-xs uppercase tracking-[0.2em] text-ink/60">
-                Titulo
-              </span>
-              <input
-                className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
-                maxLength={160}
-                onChange={(event) => updateField('title', event.target.value)}
-                required
-                value={formState.title}
-              />
-            </label>
+        {/* ── Modal body ────────────────────────────────────────────── */}
+        <div className="grid gap-6 p-6 xl:grid-cols-[1.35fr_0.65fr]">
+          {/* Left: form */}
+          <form className="grid gap-5" onSubmit={handleSubmit}>
+            {/* Section: Informações */}
+            <fieldset className="grid gap-4 rounded-xl border border-ink/8 p-4">
+              <legend className="px-1 text-xs font-semibold uppercase tracking-widest text-ink/40">
+                Informações
+              </legend>
 
-            <label className="grid gap-2 text-sm text-ink">
-              <span className="font-display text-xs uppercase tracking-[0.2em] text-ink/60">
-                Descricao
-              </span>
-              <textarea
-                className="min-h-32 rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
-                onChange={(event) =>
-                  updateField('description', event.target.value)
-                }
-                value={formState.description}
-              />
-            </label>
-              </div>
-            </div>
+              <label className={labelClass}>
+                <span className={labelTextClass}>Título *</span>
+                <input
+                  className={inputClass}
+                  maxLength={160}
+                  onChange={(event) => updateField('title', event.target.value)}
+                  placeholder="Nome da task..."
+                  required
+                  value={formState.title}
+                />
+              </label>
 
-            <div className="rounded-[1.4rem] border border-ink/10 bg-[#f8fafb] p-4">
-              <p className="font-display text-xs uppercase tracking-[0.22em] text-ink/55">
-                Metadados
-              </p>
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <label className="grid gap-2 text-sm text-ink">
-                <span className="font-display text-xs uppercase tracking-[0.2em] text-ink/60">
-                  Prioridade
-                </span>
-                <select
-                  className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
+              <label className={labelClass}>
+                <span className={labelTextClass}>Descrição</span>
+                <textarea
+                  className={`${inputClass} min-h-24 resize-none`}
                   onChange={(event) =>
-                    updateField('priority', event.target.value as TaskPriority)
+                    updateField('description', event.target.value)
                   }
-                  value={formState.priority}
-                >
-                  {Object.entries(TASK_PRIORITY_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="grid gap-2 text-sm text-ink">
-                <span className="font-display text-xs uppercase tracking-[0.2em] text-ink/60">
-                  Responsavel
-                </span>
-                <select
-                  className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
-                  onChange={(event) => updateField('assigneeId', event.target.value)}
-                  value={formState.assigneeId}
-                >
-                  <option value="">Sem responsavel</option>
-                  {users.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.name} ({user.email})
-                    </option>
-                  ))}
-                </select>
-              </label>
-              </div>
-
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <label className="grid gap-2 text-sm text-ink">
-                <span className="font-display text-xs uppercase tracking-[0.2em] text-ink/60">
-                  Data de entrega
-                </span>
-                <input
-                  className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
-                  onChange={(event) => updateField('dueDate', event.target.value)}
-                  type="datetime-local"
-                  value={formState.dueDate}
+                  placeholder="Detalhe o que precisa ser feito..."
+                  value={formState.description}
                 />
               </label>
+            </fieldset>
 
-              <label className="grid gap-2 text-sm text-ink">
-                <span className="font-display text-xs uppercase tracking-[0.2em] text-ink/60">
-                  Tags
-                </span>
-                <input
-                  className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
-                  onChange={(event) => updateField('tags', event.target.value)}
-                  placeholder="frontend, mvp, backlog"
-                  value={formState.tags}
-                />
-              </label>
-            </div>
-            </div>
+            {/* Section: Configuração */}
+            <fieldset className="grid gap-4 rounded-xl border border-ink/8 p-4">
+              <legend className="px-1 text-xs font-semibold uppercase tracking-widest text-ink/40">
+                Configuração
+              </legend>
 
-            {error ? (
-              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {error}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className={labelClass}>
+                  <span className={labelTextClass}>Prioridade</span>
+                  <select
+                    className={inputClass}
+                    onChange={(event) =>
+                      updateField('priority', event.target.value as TaskPriority)
+                    }
+                    value={formState.priority}
+                  >
+                    {Object.entries(TASK_PRIORITY_LABELS).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className={labelClass}>
+                  <span className={labelTextClass}>Responsável</span>
+                  <select
+                    className={inputClass}
+                    onChange={(event) =>
+                      updateField('assigneeId', event.target.value)
+                    }
+                    value={formState.assigneeId}
+                  >
+                    <option value="">Sem responsável</option>
+                    {users.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className={labelClass}>
+                  <span className={labelTextClass}>Data de entrega</span>
+                  <input
+                    className={inputClass}
+                    onChange={(event) =>
+                      updateField('dueDate', event.target.value)
+                    }
+                    type="datetime-local"
+                    value={formState.dueDate}
+                  />
+                </label>
+
+                <label className={labelClass}>
+                  <span className={labelTextClass}>Tags</span>
+                  <input
+                    className={inputClass}
+                    onChange={(event) =>
+                      updateField('tags', event.target.value)
+                    }
+                    placeholder="frontend, bug, mvp"
+                    value={formState.tags}
+                  />
+                </label>
               </div>
-            ) : null}
+            </fieldset>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-              <div className="text-sm text-ink/55">
-                {mode === 'edit' && task ? (
-                  <span>Status atual: {TASK_STATUS_LABELS[task.status]}</span>
-                ) : (
-                  <span>Novas tasks entram em A Fazer.</span>
-                )}
-              </div>
+            {error ? <Alert>{error}</Alert> : null}
 
-                <div className="flex flex-wrap gap-3">
+            {/* Action buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-xs text-ink/40">
+                {mode === 'edit' && task
+                  ? `Atualizado em ${new Intl.DateTimeFormat('pt-BR').format(new Date(task.updatedAt))}`
+                  : 'Novas tasks entram em "A Fazer".'}
+              </p>
+
+              <div className="flex items-center gap-2">
                 {mode === 'edit' && task ? (
-                  <button
-                    className="rounded-[1rem] border border-red-200 bg-white px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-red-700 transition hover:bg-red-50 disabled:opacity-60"
-                    disabled={submitLoading || deleteLoading}
+                  <Button
+                    variant="danger"
+                    size="md"
+                    loading={deleteLoading}
+                    disabled={submitLoading}
                     onClick={() => void handleDelete()}
                     type="button"
                   >
-                    {deleteLoading ? 'Excluindo...' : 'Excluir'}
-                  </button>
+                    Excluir
+                  </Button>
                 ) : null}
 
-                <button
-                  className="rounded-[1rem] bg-pine px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-white transition hover:bg-pine/90 disabled:opacity-60"
-                  disabled={submitLoading || deleteLoading}
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={onClose}
+                  type="button"
+                >
+                  Cancelar
+                </Button>
+
+                <Button
+                  variant="primary"
+                  size="md"
+                  loading={submitLoading}
+                  disabled={deleteLoading}
                   type="submit"
                 >
-                  {submitLoading
-                    ? 'Salvando...'
-                    : mode === 'create'
-                      ? 'Criar task'
-                      : 'Salvar alteracoes'}
-                </button>
+                  {mode === 'create' ? 'Criar task' : 'Salvar alterações'}
+                </Button>
               </div>
             </div>
           </form>
 
-          <aside className="grid gap-4">
-            <div className="rounded-[1.4rem] border border-ink/10 bg-[#f8fafb] p-5">
-              <p className="font-display text-xs uppercase tracking-[0.25em] text-pine">
-                Historico
+          {/* Right: history + summary */}
+          <aside className="grid content-start gap-4">
+            {/* History */}
+            <div className="rounded-xl border border-ink/8 bg-[#f8f9fb] p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-pine">
+                Histórico
               </p>
-              <div className="mt-4 grid gap-3">
+
+              <div className="mt-3 grid gap-2">
                 {mode === 'create' ? (
-                  <p className="text-sm text-ink/60">
-                    O historico de movimentacoes aparece depois que a task for criada e movida entre colunas.
+                  <p className="text-xs leading-relaxed text-ink/45">
+                    O histórico aparece após a task ser criada e movida entre colunas.
                   </p>
                 ) : historyLoading ? (
-                  <p className="text-sm text-ink/60">Carregando historico...</p>
+                  <p className="text-xs text-ink/45">Carregando histórico...</p>
                 ) : movements.length > 0 ? (
-                  movements.map((movement) => (
-                    <div
-                      key={movement.id}
-                      className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 text-sm text-ink/75"
-                    >
-                      <p className="font-semibold text-ink">
-                        {movement.fromStatus
-                          ? `${TASK_STATUS_LABELS[movement.fromStatus]} -> ${TASK_STATUS_LABELS[movement.toStatus]}`
-                          : `Movida para ${TASK_STATUS_LABELS[movement.toStatus]}`}
-                      </p>
-                      <p className="mt-1">
-                        por {movement.movedBy.name} em {formatMovementDate(movement.createdAt)}
-                      </p>
-                    </div>
-                  ))
+                  <div className="relative grid gap-0">
+                    {movements.map((movement, index) => (
+                      <div key={movement.id} className="flex gap-3">
+                        <div className="flex flex-col items-center">
+                          <div className="mt-1 h-2 w-2 rounded-full bg-pine/50 ring-2 ring-white" />
+                          {index < movements.length - 1 ? (
+                            <div className="w-px flex-1 bg-ink/8" />
+                          ) : null}
+                        </div>
+                        <div className="pb-3">
+                          <p className="text-xs font-medium text-ink">
+                            {movement.fromStatus
+                              ? `${TASK_STATUS_LABELS[movement.fromStatus]} → ${TASK_STATUS_LABELS[movement.toStatus]}`
+                              : `Movida para ${TASK_STATUS_LABELS[movement.toStatus]}`}
+                          </p>
+                          <p className="mt-0.5 text-[0.65rem] text-ink/45">
+                            {movement.movedBy.name} · {formatMovementDate(movement.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 ) : (
-                  <p className="text-sm text-ink/60">
-                    Nenhuma movimentacao registrada ate agora.
+                  <p className="text-xs text-ink/45">
+                    Nenhuma movimentação registrada até agora.
                   </p>
                 )}
               </div>
             </div>
 
+            {/* Summary */}
             {mode === 'edit' && task ? (
-              <div className="rounded-[1.4rem] border border-ink/10 bg-[#f8fafb] p-5 text-sm text-ink/70">
-                <p className="font-display text-xs uppercase tracking-[0.25em] text-ember">
+              <div className="rounded-xl border border-ink/8 bg-[#f8f9fb] p-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-ember">
                   Resumo
                 </p>
-                <div className="mt-4 grid gap-2">
-                  <p>
-                    <span className="text-ink/50">Criador:</span> {task.creator.name}
-                  </p>
-                  <p>
-                    <span className="text-ink/50">Status:</span> {TASK_STATUS_LABELS[task.status]}
-                  </p>
-                  <p>
-                    <span className="text-ink/50">Atualizada em:</span>{' '}
-                    {formatMovementDate(task.updatedAt)}
-                  </p>
-                </div>
+                <dl className="mt-3 grid gap-2 text-xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-ink/45">Criado por</dt>
+                    <dd className="font-medium text-ink">{task.creator.name}</dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-ink/45">Status</dt>
+                    <dd><StatusBadge status={task.status} /></dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-ink/45">Atualizada</dt>
+                    <dd className="font-medium text-ink">
+                      {new Intl.DateTimeFormat('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      }).format(new Date(task.updatedAt))}
+                    </dd>
+                  </div>
+                </dl>
               </div>
             ) : null}
           </aside>

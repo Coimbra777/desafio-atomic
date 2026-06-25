@@ -16,6 +16,8 @@ import {
   updateTaskStatus,
 } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import type { User } from '@/types/auth';
 import type {
   CreateTaskPayload,
@@ -33,30 +35,37 @@ const columns: Array<{
   status: TaskStatus;
   label: string;
   accentClassName: string;
+  dotClassName: string;
 }> = [
-  { status: 'todo', label: 'A Fazer', accentClassName: 'text-ember' },
+  {
+    status: 'todo',
+    label: 'A Fazer',
+    accentClassName: 'text-amber-600',
+    dotClassName: 'bg-amber-400',
+  },
   {
     status: 'in_progress',
     label: 'Em Andamento',
     accentClassName: 'text-pine',
+    dotClassName: 'bg-pine',
   },
   {
     status: 'in_review',
-    label: 'Em Revisao',
-    accentClassName: 'text-ink/70',
+    label: 'Em Revisão',
+    accentClassName: 'text-purple-600',
+    dotClassName: 'bg-purple-500',
   },
-  { status: 'done', label: 'Concluido', accentClassName: 'text-pine' },
+  {
+    status: 'done',
+    label: 'Concluído',
+    accentClassName: 'text-emerald-700',
+    dotClassName: 'bg-emerald-500',
+  },
 ];
 
 type ModalState =
-  | {
-      mode: 'create';
-      task: null;
-    }
-  | {
-      mode: 'edit';
-      task: Task;
-    };
+  | { mode: 'create'; task: null }
+  | { mode: 'edit'; task: Task };
 
 function groupTasksByStatus(tasks: Task[]): Record<TaskStatus, Task[]> {
   return TASK_STATUSES.reduce(
@@ -85,9 +94,7 @@ export function KanbanBoard(): JSX.Element {
   const [modalState, setModalState] = useState<ModalState | null>(null);
 
   useEffect(() => {
-    if (!token) {
-      return;
-    }
+    if (!token) return;
 
     const authToken = token;
 
@@ -100,14 +107,13 @@ export function KanbanBoard(): JSX.Element {
           getTasks(authToken),
           getUsers(authToken),
         ]);
-
         setTasks(tasksPayload);
         setUsers(usersPayload);
       } catch (loadError) {
         setError(
           loadError instanceof Error
             ? loadError.message
-            : 'Nao foi possivel carregar o Kanban.',
+            : 'Não foi possível carregar o Kanban.',
         );
       } finally {
         setLoading(false);
@@ -124,10 +130,7 @@ export function KanbanBoard(): JSX.Element {
       : null;
 
   async function refreshTasks(): Promise<void> {
-    if (!token) {
-      return;
-    }
-
+    if (!token) return;
     setRefreshing(true);
     setError(null);
 
@@ -138,7 +141,7 @@ export function KanbanBoard(): JSX.Element {
       setError(
         refreshError instanceof Error
           ? refreshError.message
-          : 'Nao foi possivel atualizar as tasks.',
+          : 'Não foi possível atualizar as tasks.',
       );
     } finally {
       setRefreshing(false);
@@ -146,10 +149,7 @@ export function KanbanBoard(): JSX.Element {
   }
 
   async function handleCreateTask(payload: CreateTaskPayload): Promise<void> {
-    if (!token) {
-      return;
-    }
-
+    if (!token) return;
     const createdTask = await createTask(payload, token);
     setTasks((current) => [createdTask, ...current]);
   }
@@ -158,19 +158,15 @@ export function KanbanBoard(): JSX.Element {
     taskId: string,
     payload: UpdateTaskPayload,
   ): Promise<void> {
-    if (!token) {
-      return;
-    }
-
+    if (!token) return;
     const updatedTask = await updateTask(taskId, payload, token);
-    setTasks((current) => current.map((task) => (task.id === taskId ? updatedTask : task)));
+    setTasks((current) =>
+      current.map((task) => (task.id === taskId ? updatedTask : task)),
+    );
   }
 
   async function handleDeleteTask(taskId: string): Promise<void> {
-    if (!token) {
-      return;
-    }
-
+    if (!token) return;
     await deleteTask(taskId, token);
     setTasks((current) => current.filter((task) => task.id !== taskId));
   }
@@ -179,15 +175,10 @@ export function KanbanBoard(): JSX.Element {
     taskId: string,
     nextStatus: TaskStatus,
   ): Promise<void> {
-    if (!token) {
-      return;
-    }
+    if (!token) return;
 
     const currentTask = tasks.find((task) => task.id === taskId);
-
-    if (!currentTask || currentTask.status === nextStatus) {
-      return;
-    }
+    if (!currentTask || currentTask.status === nextStatus) return;
 
     setStatusUpdatingId(taskId);
     setError(null);
@@ -198,12 +189,14 @@ export function KanbanBoard(): JSX.Element {
         { status: nextStatus },
         token,
       );
-      setTasks((current) => current.map((task) => (task.id === taskId ? updatedTask : task)));
+      setTasks((current) =>
+        current.map((task) => (task.id === taskId ? updatedTask : task)),
+      );
     } catch (moveError) {
       setError(
         moveError instanceof Error
           ? moveError.message
-          : 'Nao foi possivel mover a task.',
+          : 'Não foi possível mover a task.',
       );
     } finally {
       setStatusUpdatingId(null);
@@ -212,121 +205,105 @@ export function KanbanBoard(): JSX.Element {
 
   async function handleDragEnd(event: DragEndEvent): Promise<void> {
     setActiveTaskId(null);
-
     const taskId = String(event.active.id);
     const nextStatus = event.over?.id as TaskStatus | undefined;
 
-    if (!nextStatus || !TASK_STATUSES.includes(nextStatus)) {
-      return;
-    }
-
+    if (!nextStatus || !TASK_STATUSES.includes(nextStatus)) return;
     await handleMoveTask(taskId, nextStatus);
   }
 
   if (!token || !user) {
     return (
-      <section className="panel-surface rounded-[2rem] p-6 text-sm text-ink/65">
-        Validando sessao...
-      </section>
+      <div className="flex h-48 items-center justify-center rounded-2xl bg-white text-sm text-ink/50 shadow-panel">
+        Validando sessão...
+      </div>
     );
   }
 
   return (
-    <section className="grid gap-6">
-      <div className="panel-surface flex flex-col gap-5 rounded-[2rem] px-5 py-5 lg:flex-row lg:items-end lg:justify-between lg:px-6">
+    <div className="grid gap-5">
+      {/* ── Board header ──────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-display text-xs uppercase tracking-[0.3em] text-pine">
-            Board visual
-          </p>
-          <h1 className="mt-2 font-display text-3xl text-ink sm:text-4xl">
-            Kanban inspirado em board horizontal
+          <h1 className="text-xl font-bold tracking-tight text-ink">
+            Quadro Kanban
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-ink/70">
-            Crie cards, atribua responsaveis, arraste entre colunas e acompanhe o historico sem sair do fluxo principal.
+          <p className="mt-0.5 text-sm text-ink/50">
+            {tasks.length} task{tasks.length !== 1 ? 's' : ''} no total
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          <button
-            className="rounded-[1.1rem] border border-ink/10 bg-white px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-ink transition hover:bg-sand/35 disabled:opacity-60"
-            disabled={loading || refreshing}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            loading={refreshing}
+            disabled={loading}
             onClick={() => void refreshTasks()}
             type="button"
           >
             {refreshing ? 'Atualizando...' : 'Recarregar'}
-          </button>
-          <button
-            className="rounded-[1.1rem] bg-pine px-6 py-3 text-sm font-display uppercase tracking-[0.18em] text-white shadow-card transition hover:bg-pine/90"
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
             onClick={() => setModalState({ mode: 'create', task: null })}
             type="button"
           >
-            Nova task
-          </button>
+            + Nova task
+          </Button>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {columns.map((column) => (
-          <div
-            key={column.status}
-            className="rounded-[1.5rem] border border-ink/8 bg-white/55 px-4 py-4 backdrop-blur-sm"
-          >
-            <p className={`font-display text-xs uppercase tracking-[0.25em] ${column.accentClassName}`}>
-              {column.label}
-            </p>
-            <p className="mt-2 text-sm text-ink/60">
-              {groupedTasks[column.status].length} task(s) nesta etapa.
-            </p>
-          </div>
-        ))}
-      </div>
+      {/* ── Error ─────────────────────────────────────────────────────── */}
+      {error ? <Alert>{error}</Alert> : null}
 
-      {error ? (
-        <div className="rounded-[1.5rem] border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
-          {error}
-        </div>
+      {/* ── Status update toast ───────────────────────────────────────── */}
+      {statusUpdatingId ? (
+        <Alert variant="info">
+          Movendo{' '}
+          <strong>
+            {tasks.find((t) => t.id === statusUpdatingId)?.title ?? 'task'}
+          </strong>
+          ...
+        </Alert>
       ) : null}
 
+      {/* ── Board ─────────────────────────────────────────────────────── */}
       {loading ? (
-        <div className="panel-surface rounded-[2rem] p-8 text-sm text-ink/65">
-          Carregando tasks e usuarios...
+        <div className="flex h-48 items-center justify-center rounded-2xl bg-white text-sm text-ink/50 shadow-panel">
+          Carregando tasks e usuários...
         </div>
       ) : (
         <DndContext
           onDragEnd={(event) => void handleDragEnd(event)}
           onDragStart={(event) => setActiveTaskId(String(event.active.id))}
         >
-          <div className="soft-board board-scroll overflow-x-auto rounded-[2rem] p-4">
-            <div className="flex min-w-max items-start gap-5">
-            {columns.map((column) => (
-              <KanbanColumn
-                key={column.status}
-                accentClassName={column.accentClassName}
-                label={column.label}
-                onSelectTask={(task) => setModalState({ mode: 'edit', task })}
-                status={column.status}
-                tasks={groupedTasks[column.status]}
-              />
-            ))}
+          <div className="board-scroll overflow-x-auto rounded-2xl">
+            <div className="flex min-w-max items-start gap-3 p-3">
+              {columns.map((column) => (
+                <KanbanColumn
+                  key={column.status}
+                  accentClassName={column.accentClassName}
+                  dotClassName={column.dotClassName}
+                  label={column.label}
+                  onSelectTask={(task) => setModalState({ mode: 'edit', task })}
+                  status={column.status}
+                  tasks={groupedTasks[column.status]}
+                />
+              ))}
             </div>
           </div>
 
           <DragOverlay>
-            {activeTask ? <TaskCardSurface dragging task={activeTask} /> : null}
+            {activeTask ? (
+              <TaskCardSurface dragging task={activeTask} />
+            ) : null}
           </DragOverlay>
         </DndContext>
       )}
 
-      {statusUpdatingId ? (
-        <div className="rounded-[1.5rem] border border-ink/10 bg-white/80 px-5 py-4 text-sm text-ink/65">
-          Atualizando status de{' '}
-          <span className="font-semibold text-ink">
-            {tasks.find((task) => task.id === statusUpdatingId)?.title ?? 'task'}
-          </span>
-          ...
-        </div>
-      ) : null}
-
+      {/* ── Modal ─────────────────────────────────────────────────────── */}
       {modalState ? (
         <TaskModal
           mode={modalState.mode}
@@ -339,6 +316,6 @@ export function KanbanBoard(): JSX.Element {
           users={users}
         />
       ) : null}
-    </section>
+    </div>
   );
 }

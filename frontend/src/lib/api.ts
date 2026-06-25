@@ -19,12 +19,18 @@ import type {
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 const ERROR_MESSAGE_MAP: Record<string, string> = {
+  "Invalid credentials.":
+    "E-mail ou senha incorretos. Verifique os dados e tente novamente.",
   "Invalid credentials":
     "E-mail ou senha incorretos. Verifique os dados e tente novamente.",
+  "Email is already in use.":
+    "Este e-mail já está cadastrado. Tente fazer login ou usar outro e-mail.",
   "User already exists":
     "Este e-mail já está cadastrado. Tente fazer login ou usar outro e-mail.",
   "Email already exists":
     "Este e-mail já está cadastrado. Tente fazer login ou usar outro e-mail.",
+  "Task not found.": "Task não encontrada.",
+  "User not found.": "Usuário não encontrado.",
   "Not found": "Recurso não encontrado.",
   Unauthorized: "Você não está autorizado a realizar esta ação.",
   Forbidden: "Acesso negado.",

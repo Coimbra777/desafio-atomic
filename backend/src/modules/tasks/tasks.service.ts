@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -20,6 +21,8 @@ import { TaskMovementResponse, TaskResponse } from './tasks.types';
 
 @Injectable()
 export class TasksService {
+  private readonly logger = new Logger(TasksService.name);
+
   constructor(
     @InjectRepository(Task)
     private readonly tasksRepository: Repository<Task>,
@@ -69,13 +72,15 @@ export class TasksService {
     const taskWithRelations = await this.findTaskEntityOrFail(createdTask.id);
 
     if (taskWithRelations.assignee) {
-      await this.notificationsPublisherService.publishTaskAssigned({
+      this.notificationsPublisherService.publishTaskAssigned({
         type: 'task-assigned',
         recipientEmail: taskWithRelations.assignee.email,
         recipientName: taskWithRelations.assignee.name,
         taskId: taskWithRelations.id,
         taskTitle: taskWithRelations.title,
         assignedByEmail: taskWithRelations.creator.email,
+      }).catch((err: unknown) => {
+        this.logger.warn(`[task:${taskWithRelations.id}] Falha ao enfileirar notificacao task-assigned: ${String(err)}`);
       });
     }
 
@@ -88,7 +93,7 @@ export class TasksService {
     return this.toTaskResponse(task);
   }
 
-  async update(id: string, payload: UpdateTaskDto): Promise<TaskResponse> {
+  async update(id: string, payload: UpdateTaskDto, authenticatedUser: AuthenticatedUser): Promise<TaskResponse> {
     const task = await this.findTaskEntityOrFail(id);
     const previousStatus = task.status;
     const previousAssigneeId = task.assigneeId;
@@ -135,21 +140,34 @@ export class TasksService {
 
     if (payload.assigneeId !== undefined && updatedTask.assigneeId !== previousAssigneeId) {
       if (updatedTask.assignee) {
-        await this.notificationsPublisherService.publishTaskAssigned({
+        this.notificationsPublisherService.publishTaskAssigned({
           type: 'task-assigned',
           recipientEmail: updatedTask.assignee.email,
           recipientName: updatedTask.assignee.name,
           taskId: updatedTask.id,
           taskTitle: updatedTask.title,
           assignedByEmail: updatedTask.creator.email,
+        }).catch((err: unknown) => {
+          this.logger.warn(`[task:${updatedTask.id}] Falha ao enfileirar notificacao task-assigned: ${String(err)}`);
         });
       }
     }
 
     if (payload.status !== undefined && updatedTask.status !== previousStatus) {
+      const movement = this.taskMovementsRepository.create({
+        taskId: updatedTask.id,
+        task: updatedTask,
+        fromStatus: previousStatus,
+        toStatus: updatedTask.status,
+        movedById: authenticatedUser.sub,
+        movedBy: await this.findRequiredUser(authenticatedUser.sub),
+      });
+
+      await this.taskMovementsRepository.save(movement);
+
       const recipient = updatedTask.assignee ?? updatedTask.creator;
 
-      await this.notificationsPublisherService.publishTaskStatusChanged({
+      this.notificationsPublisherService.publishTaskStatusChanged({
         type: 'task-status-changed',
         recipientEmail: recipient.email,
         recipientName: recipient.name,
@@ -157,6 +175,8 @@ export class TasksService {
         taskTitle: updatedTask.title,
         previousStatus,
         currentStatus: updatedTask.status,
+      }).catch((err: unknown) => {
+        this.logger.warn(`[task:${updatedTask.id}] Falha ao enfileirar notificacao task-status-changed: ${String(err)}`);
       });
     }
 
@@ -196,7 +216,7 @@ export class TasksService {
       const recipient =
         updatedTaskWithRelations.assignee ?? updatedTaskWithRelations.creator;
 
-      await this.notificationsPublisherService.publishTaskStatusChanged({
+      this.notificationsPublisherService.publishTaskStatusChanged({
         type: 'task-status-changed',
         recipientEmail: recipient.email,
         recipientName: recipient.name,
@@ -204,6 +224,8 @@ export class TasksService {
         taskTitle: updatedTaskWithRelations.title,
         previousStatus,
         currentStatus: updatedTaskWithRelations.status,
+      }).catch((err: unknown) => {
+        this.logger.warn(`[task:${updatedTaskWithRelations.id}] Falha ao enfileirar notificacao task-status-changed: ${String(err)}`);
       });
     }
 

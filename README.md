@@ -81,7 +81,7 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-3. Confira os servicos:
+3. Aguarde os healthchecks de postgres e redis (cerca de 15s) e confira os servicos:
 
 ```bash
 docker compose ps
@@ -166,6 +166,8 @@ Observacoes:
 
 - `.env` nao deve ser commitado
 - o repositorio nao contem secrets reais
+- `JWT_SECRET` e obrigatorio: a aplicacao recusa iniciar se a variavel nao estiver definida
+- `DB_PASSWORD` e `JWT_SECRET` devem ser trocados por valores fortes antes de qualquer deploy
 
 ## Endpoints principais
 
@@ -281,6 +283,15 @@ Exemplo de log esperado no worker:
 [EmailWorker][task_status_changed] Sending notification to user@email.com: Task "Preparar quadro inicial" changed status to in_progress
 ```
 
+## Seguranca
+
+- `JWT_SECRET` e validado no boot via `getOrThrow`: sem fallback em producao
+- Senhas armazenadas com bcrypt (10 rounds)
+- Helmet habilita headers de seguranca HTTP
+- CORS restrito ao dominio do frontend (`FRONTEND_URL`)
+- Dados de usuario nunca expoe `passwordHash`
+- Docker Compose com healthchecks: api e worker so sobem apos postgres e redis estarem prontos
+
 ## Decisoes tecnicas
 
 - TypeORM foi mantido para seguir o padrao do projeto de referencia e a estrutura pedida no case.
@@ -292,13 +303,15 @@ Exemplo de log esperado no worker:
 
 ## Trade-offs
 
-- autenticacao sem refresh token
-- sem permissoes avancadas
-- delete fisico de tasks
-- historico registrado apenas na rota de mudanca de status
-- notificacao simulada por log em vez de SMTP real
-- dashboard com agregacoes simples, sem comparativos complexos
-- sem WebSocket; atualizacao e por reload ou nova consulta
+- **autenticacao**: sem refresh token; o token expira em 1d e exige novo login
+- **armazenamento do token**: salvo em `localStorage` para manter o fluxo simples; em producao, `HttpOnly cookie` seria mais seguro contra XSS
+- **permissoes**: sem RBAC avancado; qualquer usuario autenticado pode editar ou excluir qualquer task; o MVP prioriza funcionalidade sobre controle de acesso
+- **delete fisico**: tasks excluidas nao ficam em um "lixo"; operacao irreversivel para manter o modelo simples
+- **notificacoes**: simuladas por log no worker; sem SMTP real; substituivel por qualquer provider de e-mail sem alterar o contrato da fila
+- **notificacoes assincronas com BullMQ**: a API publica eventos na fila `email-notifications` e retorna imediatamente; o worker consome em processo separado; falha no Redis nao quebra criacao ou edicao de tasks
+- **dashboard**: agregacoes simples sem comparativos temporais entre periodos; extensivel sem alterar o schema
+- **atualizacao em tempo real**: sem WebSocket; o board atualiza por reload manual ou botao de recarregar
+- **upload de anexos**: nao implementado; nao e requisito obrigatorio do desafio; seria resolvido com storage externo (S3 ou equivalente) sem alterar a arquitetura atual
 
 ## Validacao manual sugerida
 

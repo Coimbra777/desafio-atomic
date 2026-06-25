@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 import { useAuth } from "@/lib/auth-context";
-
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { AuthCard } from "../ui/auth-card";
 
 type LoginFormProps = {
@@ -26,10 +26,7 @@ export function LoginForm({ onToggleToRegister }: LoginFormProps): JSX.Element {
     setIsSubmitting(true);
 
     try {
-      await signIn({
-        email,
-        password,
-      });
+      await signIn({ email, password });
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -43,14 +40,14 @@ export function LoginForm({ onToggleToRegister }: LoginFormProps): JSX.Element {
 
   return (
     <AuthCard
-      eyebrow="TaskFlow"
-      title="Entre em sua conta"
-      description="Use seu e-mail e senha para acessar a sua conta."
+      eyebrow="Acesso"
+      title="Entre na sua conta"
+      description="Use seu e-mail e senha para acessar o painel."
       footer={
-        <p className="text-sm text-ink/70">
+        <p className="text-sm text-ink/55">
           Ainda não tem conta?{" "}
           <button
-            className="font-semibold text-pine hover:text-pine/80 transition"
+            className="font-semibold text-pine underline-offset-2 hover:underline"
             onClick={onToggleToRegister}
             type="button"
           >
@@ -60,48 +57,45 @@ export function LoginForm({ onToggleToRegister }: LoginFormProps): JSX.Element {
       }
     >
       <form className="grid gap-4" onSubmit={handleSubmit}>
-        <label className="grid gap-2 text-sm text-ink">
-          <span className="font-display uppercase tracking-[0.2em] text-xs text-ink/65">
-            E-mail
-          </span>
+        <label className="grid gap-1.5">
+          <span className="text-xs font-medium text-ink/60">E-mail</span>
           <input
-            className="rounded-2xl border border-ink/10 bg-white/80 px-4 py-3 outline-none transition focus:border-pine"
+            className="input-base"
             type="email"
             placeholder="voce@exemplo.com"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
+            autoComplete="email"
             required
           />
         </label>
 
-        <label className="grid gap-2 text-sm text-ink">
-          <span className="font-display uppercase tracking-[0.2em] text-xs text-ink/65">
-            Senha
-          </span>
+        <label className="grid gap-1.5">
+          <span className="text-xs font-medium text-ink/60">Senha</span>
           <input
-            className="rounded-2xl border border-ink/10 bg-white/80 px-4 py-3 outline-none transition focus:border-pine"
+            className="input-base"
             type="password"
             placeholder="Digite sua senha"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
             required
             minLength={8}
           />
         </label>
 
-        {error ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
-        ) : null}
+        {error ? <Alert>{error}</Alert> : null}
 
-        <button
-          className="rounded-full bg-pine px-5 py-3 font-display text-sm uppercase tracking-[0.18em] text-white transition hover:bg-pine/90 disabled:cursor-not-allowed disabled:opacity-60"
-          disabled={isSubmitting || status === "loading"}
+        <Button
           type="submit"
+          variant="primary"
+          size="lg"
+          loading={isSubmitting}
+          disabled={status === "loading"}
+          className="mt-1 w-full"
         >
           {isSubmitting ? "Entrando..." : "Fazer login"}
-        </button>
+        </Button>
       </form>
     </AuthCard>
   );

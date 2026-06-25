@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 import { useAuth } from "@/lib/auth-context";
-
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { AuthCard } from "../ui/auth-card";
 
 type RegisterFormProps = {
@@ -29,11 +29,7 @@ export function RegisterForm({
     setIsSubmitting(true);
 
     try {
-      await signUp({
-        name,
-        email,
-        password,
-      });
+      await signUp({ name, email, password });
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -47,14 +43,14 @@ export function RegisterForm({
 
   return (
     <AuthCard
-      eyebrow="Criar conta"
+      eyebrow="Cadastro"
       title="Crie sua conta"
-      description="Preencha os dados abaixo e você terá acesso imediato à sua conta."
+      description="Preencha os dados abaixo e você terá acesso imediato ao painel."
       footer={
-        <p className="text-sm text-ink/70">
+        <p className="text-sm text-ink/55">
           Já tem conta?{" "}
           <button
-            className="font-semibold text-ember hover:text-ember/80 transition"
+            className="font-semibold text-pine underline-offset-2 hover:underline"
             onClick={onToggleToLogin}
             type="button"
           >
@@ -64,62 +60,59 @@ export function RegisterForm({
       }
     >
       <form className="grid gap-4" onSubmit={handleSubmit}>
-        <label className="grid gap-2 text-sm text-ink">
-          <span className="font-display uppercase tracking-[0.2em] text-xs text-ink/65">
-            Nome
-          </span>
+        <label className="grid gap-1.5">
+          <span className="text-xs font-medium text-ink/60">Nome</span>
           <input
-            className="rounded-2xl border border-ink/10 bg-white/80 px-4 py-3 outline-none transition focus:border-ember"
+            className="input-base"
             type="text"
-            placeholder="Seu nome"
+            placeholder="Seu nome completo"
             value={name}
             onChange={(event) => setName(event.target.value)}
+            autoComplete="name"
             required
+            maxLength={120}
           />
         </label>
 
-        <label className="grid gap-2 text-sm text-ink">
-          <span className="font-display uppercase tracking-[0.2em] text-xs text-ink/65">
-            E-mail
-          </span>
+        <label className="grid gap-1.5">
+          <span className="text-xs font-medium text-ink/60">E-mail</span>
           <input
-            className="rounded-2xl border border-ink/10 bg-white/80 px-4 py-3 outline-none transition focus:border-ember"
+            className="input-base"
             type="email"
             placeholder="voce@exemplo.com"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
+            autoComplete="email"
             required
           />
         </label>
 
-        <label className="grid gap-2 text-sm text-ink">
-          <span className="font-display uppercase tracking-[0.2em] text-xs text-ink/65">
-            Senha
-          </span>
+        <label className="grid gap-1.5">
+          <span className="text-xs font-medium text-ink/60">Senha</span>
           <input
-            className="rounded-2xl border border-ink/10 bg-white/80 px-4 py-3 outline-none transition focus:border-ember"
+            className="input-base"
             type="password"
             placeholder="Mínimo de 8 caracteres"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            autoComplete="new-password"
             required
             minLength={8}
           />
         </label>
 
-        {error ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
-        ) : null}
+        {error ? <Alert>{error}</Alert> : null}
 
-        <button
-          className="rounded-full bg-ember px-5 py-3 font-display text-sm uppercase tracking-[0.18em] text-white transition hover:bg-ember/90 disabled:cursor-not-allowed disabled:opacity-60"
-          disabled={isSubmitting || status === "loading"}
+        <Button
           type="submit"
+          variant="primary"
+          size="lg"
+          loading={isSubmitting}
+          disabled={status === "loading"}
+          className="mt-1 w-full"
         >
           {isSubmitting ? "Criando conta..." : "Criar conta"}
-        </button>
+        </Button>
       </form>
     </AuthCard>
   );

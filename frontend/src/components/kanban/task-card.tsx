@@ -3,8 +3,8 @@
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
-import type { Task, TaskPriority } from '@/types/task';
-import { TASK_PRIORITY_LABELS, TASK_STATUS_LABELS } from '@/types/task';
+import { PriorityBadge } from '@/components/ui/badge';
+import type { Task } from '@/types/task';
 
 type TaskCardSurfaceProps = {
   task: Task;
@@ -12,24 +12,18 @@ type TaskCardSurfaceProps = {
   dragging?: boolean;
 };
 
-const priorityClasses: Record<TaskPriority, string> = {
-  low: 'bg-[#dceae5] text-pine',
-  medium: 'bg-[#f2e4c7] text-[#6f5131]',
-  high: 'bg-[#f8d8cf] text-ember',
-};
-
 function formatDueDate(value: string | null): string | null {
-  if (!value) {
-    return null;
-  }
-
+  if (!value) return null;
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
   }).format(new Date(value));
+}
+
+function isPastDue(value: string | null): boolean {
+  if (!value) return false;
+  return new Date(value) < new Date();
 }
 
 export function TaskCardSurface({
@@ -37,78 +31,60 @@ export function TaskCardSurface({
   onSelect,
   dragging = false,
 }: TaskCardSurfaceProps): JSX.Element {
-  const dueDateLabel = formatDueDate(task.dueDate);
+  const dueDate = formatDueDate(task.dueDate);
+  const overdue = isPastDue(task.dueDate);
 
   return (
     <button
-      className={`panel-surface flex w-full flex-col gap-3 rounded-[1rem] px-4 py-3 text-left transition ${
-        dragging
-          ? 'cursor-grabbing opacity-80 shadow-card'
-          : 'cursor-pointer hover:-translate-y-0.5 hover:shadow-card'
-      }`}
+      className={`task-card ${dragging ? 'opacity-80 rotate-1 shadow-card-hover scale-105' : ''}`}
       onClick={onSelect ? () => onSelect(task) : undefined}
       type="button"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="font-display text-[0.62rem] uppercase tracking-[0.24em] text-ink/45">
-            {TASK_STATUS_LABELS[task.status]}
-          </p>
-          <h3 className="mt-1.5 text-[0.98rem] font-semibold leading-6 text-ink">
-            {task.title}
-          </h3>
-        </div>
-        <span
-          className={`rounded-full px-2.5 py-1 text-[0.62rem] font-display uppercase tracking-[0.16em] ${
-            priorityClasses[task.priority]
-          }`}
-        >
-          {TASK_PRIORITY_LABELS[task.priority]}
-        </span>
+      {/* Title row */}
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="flex-1 text-sm font-semibold leading-snug text-ink">
+          {task.title}
+        </h3>
+        <PriorityBadge priority={task.priority} />
       </div>
 
+      {/* Description */}
       {task.description ? (
-        <p className="line-clamp-3 text-sm leading-6 text-ink/72">
+        <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-ink/50">
           {task.description}
         </p>
-      ) : (
-        <p className="text-sm italic text-ink/45">Sem descricao.</p>
-      )}
+      ) : null}
 
-      <div className="flex flex-wrap gap-2">
-        {task.tags.length > 0 ? (
-          task.tags.map((tag) => (
+      {/* Tags */}
+      {task.tags.length > 0 ? (
+        <div className="mt-2.5 flex flex-wrap gap-1">
+          {task.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full border border-ink/10 bg-[#f6f7f9] px-2.5 py-1 text-[0.7rem] text-ink/68"
+              className="rounded-full bg-ink/6 px-2 py-0.5 text-[0.65rem] font-medium text-ink/55"
             >
               #{tag}
             </span>
-          ))
-        ) : (
-          <span className="rounded-full border border-dashed border-ink/10 px-3 py-1 text-xs text-ink/45">
-            Sem tags
-          </span>
-        )}
-      </div>
+          ))}
+        </div>
+      ) : null}
 
-      <div className="grid gap-2 rounded-[0.9rem] bg-[#f7f8fa] px-3 py-3 text-sm text-ink/68">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-xs uppercase tracking-[0.14em] text-ink/44">
-            Responsavel
+      {/* Footer */}
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-ink/6 pt-2.5">
+        <span className="truncate text-[0.7rem] text-ink/45">
+          {task.assignee?.name ?? 'Sem responsável'}
+        </span>
+        {dueDate ? (
+          <span
+            className={`shrink-0 rounded-full px-2 py-0.5 text-[0.65rem] font-medium ${
+              overdue
+                ? 'bg-ember/10 text-ember'
+                : 'bg-ink/6 text-ink/50'
+            }`}
+          >
+            {dueDate}
           </span>
-          <span className="font-medium text-ink">
-            {task.assignee?.name ?? 'Nao atribuido'}
-          </span>
-        </div>
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-xs uppercase tracking-[0.14em] text-ink/44">
-            Entrega
-          </span>
-          <span className="font-medium text-ink">
-            {dueDateLabel ?? 'Sem prazo'}
-          </span>
-        </div>
+        ) : null}
       </div>
     </button>
   );
@@ -123,19 +99,14 @@ export function TaskCard({ task, onSelect }: TaskCardProps): JSX.Element {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: task.id,
-      data: {
-        taskId: task.id,
-        status: task.status,
-      },
+      data: { taskId: task.id, status: task.status },
     });
 
   return (
     <div
       ref={setNodeRef}
       className="touch-none"
-      style={{
-        transform: CSS.Translate.toString(transform),
-      }}
+      style={{ transform: CSS.Translate.toString(transform) }}
       {...listeners}
       {...attributes}
     >

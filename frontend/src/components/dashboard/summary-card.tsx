@@ -5,6 +5,7 @@ type SummaryCardProps = {
   title: string;
   value: number | string;
   toneClassName: string;
+  subtitle?: string;
 };
 
 export function SummaryCard({
@@ -12,14 +13,18 @@ export function SummaryCard({
   title,
   value,
   toneClassName,
+  subtitle,
 }: SummaryCardProps): JSX.Element {
   return (
-    <div className="panel-surface rounded-[1.4rem] px-5 py-5">
-      <p className={`font-display text-xs uppercase tracking-[0.28em] ${toneClassName}`}>
+    <div className="flex flex-col rounded-2xl border border-ink/8 bg-white p-5 shadow-panel">
+      <p className={`text-xs font-semibold uppercase tracking-widest ${toneClassName}`}>
         {eyebrow}
       </p>
-      <p className="mt-3 text-sm text-ink/60">{title}</p>
-      <p className="mt-4 font-display text-4xl text-ink">{value}</p>
+      <p className="mt-3 text-4xl font-bold tracking-tight text-ink">{value}</p>
+      <p className="mt-1.5 text-sm font-medium text-ink/55">{title}</p>
+      {subtitle ? (
+        <p className="mt-1 text-xs text-ink/35">{subtitle}</p>
+      ) : null}
     </div>
   );
 }

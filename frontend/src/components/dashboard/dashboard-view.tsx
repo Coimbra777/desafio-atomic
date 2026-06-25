@@ -16,22 +16,21 @@ import {
 
 import { getDashboardSummary } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import type { DashboardSummary, DashboardSummaryFilters } from '@/types/dashboard';
 import { TASK_STATUS_LABELS } from '@/types/task';
 
 import { SummaryCard } from './summary-card';
 
-const statusColors = ['#ad5d3d', '#28594d', '#7b867f', '#1b1f1d'];
+const statusColors = ['#f59e0b', '#28594d', '#8b5cf6', '#10b981'];
 
 type FilterState = {
   startDate: string;
   endDate: string;
 };
 
-const initialFilters: FilterState = {
-  startDate: '',
-  endDate: '',
-};
+const initialFilters: FilterState = { startDate: '', endDate: '' };
 
 function formatDateLabel(value: string): string {
   return new Intl.DateTimeFormat('pt-BR', {
@@ -39,6 +38,12 @@ function formatDateLabel(value: string): string {
     month: '2-digit',
   }).format(new Date(`${value}T00:00:00`));
 }
+
+const inputClass =
+  'w-full rounded-lg border border-ink/12 bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition focus:border-pine focus:ring-2 focus:ring-pine/15';
+
+const chartGridProps = { strokeDasharray: '3 3', stroke: '#e5e7eb' };
+const chartAxisProps = { stroke: '#9ca3af', fontSize: 12 };
 
 export function DashboardView(): JSX.Element {
   const { token } = useAuth();
@@ -50,9 +55,7 @@ export function DashboardView(): JSX.Element {
     useState<DashboardSummaryFilters>({});
 
   useEffect(() => {
-    if (!token) {
-      return;
-    }
+    if (!token) return;
 
     const authToken = token;
 
@@ -67,7 +70,7 @@ export function DashboardView(): JSX.Element {
         setError(
           loadError instanceof Error
             ? loadError.message
-            : 'Nao foi possivel carregar o dashboard.',
+            : 'Não foi possível carregar o dashboard.',
         );
       } finally {
         setLoading(false);
@@ -90,8 +93,8 @@ export function DashboardView(): JSX.Element {
     () =>
       (summary?.byAssignee ?? []).map((item) => ({
         name:
-          item.assigneeName.length > 16
-            ? `${item.assigneeName.slice(0, 16)}...`
+          item.assigneeName.length > 18
+            ? `${item.assigneeName.slice(0, 18)}…`
             : item.assigneeName,
         total: item.count,
       })),
@@ -108,13 +111,15 @@ export function DashboardView(): JSX.Element {
   );
 
   function updateFilter(field: keyof FilterState, value: string): void {
-    setFilters((current) => ({
-      ...current,
-      [field]: value,
-    }));
+    setFilters((current) => ({ ...current, [field]: value }));
   }
 
   function applyFilters(): void {
+    if (filters.startDate && filters.endDate && filters.startDate > filters.endDate) {
+      setError('A data inicial não pode ser maior que a data final.');
+      return;
+    }
+    setError(null);
     setAppliedFilters({
       startDate: filters.startDate || undefined,
       endDate: filters.endDate || undefined,
@@ -126,130 +131,123 @@ export function DashboardView(): JSX.Element {
     setAppliedFilters({});
   }
 
+  const hasFilters = Boolean(appliedFilters.startDate ?? appliedFilters.endDate);
+
   return (
-    <section className="grid gap-6">
-      <div className="panel-surface flex flex-col gap-5 rounded-[2rem] px-5 py-5 lg:flex-row lg:items-end lg:justify-between lg:px-6">
+    <div className="grid gap-6">
+      {/* ── Page header + filters ─────────────────────────────────────── */}
+      <div className="flex flex-col gap-5 rounded-2xl border border-ink/8 bg-white p-5 shadow-panel sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="font-display text-xs uppercase tracking-[0.3em] text-pine">
-            Dashboard analitico
-          </p>
-          <h1 className="mt-2 font-display text-3xl text-ink sm:text-4xl">
-            Panorama simples do fluxo
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-ink/70">
-            Veja distribuicao dos cards por status, tarefas por responsavel, total de atrasos e conclusoes por dia com dados reais do backend.
+          <h1 className="text-xl font-bold tracking-tight text-ink">Dashboard</h1>
+          <p className="mt-0.5 text-sm text-ink/50">
+            Visão geral das tarefas e métricas do time.
           </p>
         </div>
 
-        <div className="soft-board grid gap-4 rounded-[1.5rem] px-4 py-4 sm:grid-cols-3">
-          <label className="grid gap-2 text-sm text-ink">
-            <span className="font-display text-xs uppercase tracking-[0.2em] text-ink/60">
-              Data inicial
-            </span>
+        <div className="flex flex-wrap items-end gap-3">
+          <label className="grid gap-1.5">
+            <span className="text-xs font-medium text-ink/50">Data inicial</span>
             <input
-              className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
+              className={inputClass}
               onChange={(event) => updateFilter('startDate', event.target.value)}
+              style={{ width: '8.5rem' }}
               type="date"
               value={filters.startDate}
             />
           </label>
 
-          <label className="grid gap-2 text-sm text-ink">
-            <span className="font-display text-xs uppercase tracking-[0.2em] text-ink/60">
-              Data final
-            </span>
+          <label className="grid gap-1.5">
+            <span className="text-xs font-medium text-ink/50">Data final</span>
             <input
-              className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
+              className={inputClass}
               onChange={(event) => updateFilter('endDate', event.target.value)}
+              style={{ width: '8.5rem' }}
               type="date"
               value={filters.endDate}
             />
           </label>
 
-          <div className="flex flex-wrap items-end gap-3">
-            <button
-              className="rounded-[1rem] bg-pine px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-white transition hover:bg-pine/90"
-              onClick={applyFilters}
-              type="button"
-            >
-              Aplicar
-            </button>
-            <button
-              className="rounded-[1rem] border border-ink/10 bg-white px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-ink transition hover:bg-sand/35"
-              onClick={clearFilters}
-              type="button"
-            >
+          <Button variant="primary" size="md" onClick={applyFilters} type="button">
+            Aplicar
+          </Button>
+
+          {hasFilters ? (
+            <Button variant="ghost" size="md" onClick={clearFilters} type="button">
               Limpar
-            </button>
-          </div>
+            </Button>
+          ) : null}
         </div>
       </div>
 
-      {error ? (
-        <div className="rounded-[1.5rem] border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
-          {error}
-        </div>
-      ) : null}
+      {/* ── Error ─────────────────────────────────────────────────────── */}
+      {error ? <Alert>{error}</Alert> : null}
 
+      {/* ── Loading ───────────────────────────────────────────────────── */}
       {loading || !summary ? (
-        <div className="panel-surface rounded-[2rem] p-8 text-sm text-ink/65">
+        <div className="flex h-48 items-center justify-center rounded-2xl border border-ink/8 bg-white text-sm text-ink/50 shadow-panel">
           Carregando resumo do dashboard...
         </div>
       ) : (
         <>
+          {/* ── Summary cards ─────────────────────────────────────────── */}
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <SummaryCard
               eyebrow="Total"
-              title="Tasks no periodo"
-              toneClassName="text-ink/70"
+              title="Tasks no período"
+              toneClassName="text-ink/50"
               value={summary.totals.totalTasks}
             />
             <SummaryCard
-              eyebrow="Concluidas"
-              title="Cards em done"
-              toneClassName="text-pine"
+              eyebrow="Concluídas"
+              title="Chegaram ao status Done"
+              toneClassName="text-emerald-600"
               value={summary.totals.completedTasks}
             />
             <SummaryCard
               eyebrow="Atrasadas"
-              title="Tasks vencidas e nao concluidas"
+              title="Prazo vencido e não concluídas"
               toneClassName="text-ember"
               value={summary.totals.overdueTasks}
             />
             <SummaryCard
-              eyebrow="Periodo"
+              eyebrow="Período"
               title="Filtro aplicado"
-              toneClassName="text-ink/70"
+              toneClassName="text-pine"
               value={
-                summary.filters.startDate || summary.filters.endDate
-                  ? `${summary.filters.startDate ?? '...'} ate ${summary.filters.endDate ?? '...'}`
-                  : 'Todos'
+                summary.filters.startDate ?? summary.filters.endDate
+                  ? `${summary.filters.startDate ?? '…'} até ${summary.filters.endDate ?? '…'}`
+                  : 'Todos os tempos'
               }
             />
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[1.05fr,0.95fr]">
-            <div className="panel-surface rounded-[1.75rem] px-5 py-5">
-              <div className="mb-4">
-                <p className="font-display text-xs uppercase tracking-[0.25em] text-ember">
-                  Cards por status
-                </p>
-                <h2 className="mt-2 text-xl font-semibold text-ink">
-                  Distribuicao atual do quadro
-                </h2>
-              </div>
-
-              <div className="h-80">
+          {/* ── Charts row 1 ──────────────────────────────────────────── */}
+          <div className="grid gap-5 xl:grid-cols-2">
+            {/* Status chart */}
+            <div className="rounded-2xl border border-ink/8 bg-white p-5 shadow-panel">
+              <p className="text-xs font-semibold uppercase tracking-widest text-ember">
+                Distribuição por status
+              </p>
+              <h2 className="mt-1 text-base font-semibold text-ink">
+                Tasks por etapa do fluxo
+              </h2>
+              <div className="mt-5 h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={statusChartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#d8d1c4" />
-                    <XAxis dataKey="name" stroke="#615c54" />
-                    <YAxis allowDecimals={false} stroke="#615c54" />
-                    <Tooltip />
-                    <Bar dataKey="total" radius={[12, 12, 0, 0]}>
+                  <BarChart data={statusChartData} barSize={36}>
+                    <CartesianGrid {...chartGridProps} />
+                    <XAxis dataKey="name" {...chartAxisProps} />
+                    <YAxis allowDecimals={false} {...chartAxisProps} />
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: '0.625rem',
+                        border: '1px solid rgba(27,31,29,0.10)',
+                        fontSize: '0.8125rem',
+                      }}
+                    />
+                    <Bar dataKey="total" radius={[6, 6, 0, 0]}>
                       {statusChartData.map((entry, index) => (
                         <Cell
-                          key={`${entry.name}-${statusColors[index] ?? 'default'}`}
+                          key={`${entry.name}-${index}`}
                           fill={statusColors[index] ?? '#28594d'}
                         />
                       ))}
@@ -259,90 +257,105 @@ export function DashboardView(): JSX.Element {
               </div>
             </div>
 
-            <div className="panel-surface rounded-[1.75rem] px-5 py-5">
-              <div className="mb-4">
-                <p className="font-display text-xs uppercase tracking-[0.25em] text-pine">
-                  Tarefas por responsavel
-                </p>
-                <h2 className="mt-2 text-xl font-semibold text-ink">
-                  Distribuicao de ownership
-                </h2>
-              </div>
-
-              <div className="h-80">
+            {/* Assignee chart */}
+            <div className="rounded-2xl border border-ink/8 bg-white p-5 shadow-panel">
+              <p className="text-xs font-semibold uppercase tracking-widest text-pine">
+                Distribuição por responsável
+              </p>
+              <h2 className="mt-1 text-base font-semibold text-ink">
+                Ownership das tarefas
+              </h2>
+              <div className="mt-5 h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={assigneeChartData} layout="vertical" margin={{ left: 12 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#d8d1c4" />
-                    <XAxis allowDecimals={false} type="number" stroke="#615c54" />
-                    <YAxis dataKey="name" type="category" width={96} stroke="#615c54" />
-                    <Tooltip />
-                    <Bar dataKey="total" fill="#28594d" radius={[0, 12, 12, 0]} />
+                  <BarChart
+                    data={assigneeChartData}
+                    layout="vertical"
+                    margin={{ left: 8, right: 16 }}
+                  >
+                    <CartesianGrid {...chartGridProps} />
+                    <XAxis allowDecimals={false} type="number" {...chartAxisProps} />
+                    <YAxis
+                      dataKey="name"
+                      type="category"
+                      width={100}
+                      {...chartAxisProps}
+                      tick={{ fontSize: 11 }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: '0.625rem',
+                        border: '1px solid rgba(27,31,29,0.10)',
+                        fontSize: '0.8125rem',
+                      }}
+                    />
+                    <Bar dataKey="total" fill="#28594d" radius={[0, 6, 6, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[1.05fr,0.95fr]">
-            <div className="panel-surface rounded-[1.75rem] px-5 py-5">
-              <div className="mb-4">
-                <p className="font-display text-xs uppercase tracking-[0.25em] text-ink/70">
-                  Conclusoes por dia
-                </p>
-                <h2 className="mt-2 text-xl font-semibold text-ink">
-                  Ritmo de entregas
-                </h2>
-              </div>
-
-              <div className="h-72">
+          {/* ── Charts row 2 ──────────────────────────────────────────── */}
+          <div className="grid gap-5 xl:grid-cols-[1.4fr_0.6fr]">
+            {/* Completions line chart */}
+            <div className="rounded-2xl border border-ink/8 bg-white p-5 shadow-panel">
+              <p className="text-xs font-semibold uppercase tracking-widest text-ink/50">
+                Ritmo de entregas
+              </p>
+              <h2 className="mt-1 text-base font-semibold text-ink">
+                Conclusões por dia
+              </h2>
+              <div className="mt-5 h-56">
                 {completionsChartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={completionsChartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#d8d1c4" />
-                      <XAxis dataKey="date" stroke="#615c54" />
-                      <YAxis allowDecimals={false} stroke="#615c54" />
-                      <Tooltip />
+                      <CartesianGrid {...chartGridProps} />
+                      <XAxis dataKey="date" {...chartAxisProps} />
+                      <YAxis allowDecimals={false} {...chartAxisProps} />
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: '0.625rem',
+                          border: '1px solid rgba(27,31,29,0.10)',
+                          fontSize: '0.8125rem',
+                        }}
+                      />
                       <Line
                         dataKey="total"
                         stroke="#ad5d3d"
-                        strokeWidth={3}
-                        dot={{ fill: '#ad5d3d', r: 4 }}
+                        strokeWidth={2.5}
+                        dot={{ fill: '#ad5d3d', r: 4, strokeWidth: 2, stroke: '#fff' }}
+                        activeDot={{ r: 6 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex h-full items-center justify-center rounded-[1.5rem] border border-dashed border-ink/10 bg-white/60 px-4 text-center text-sm text-ink/45">
-                    Ainda nao ha movimentacoes para done no periodo selecionado.
+                  <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-ink/10 text-center text-sm text-ink/35">
+                    Nenhuma task concluída no período.
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="panel-surface rounded-[1.75rem] px-5 py-5">
-              <div className="mb-4">
-                <p className="font-display text-xs uppercase tracking-[0.25em] text-ember">
-                  Tasks atrasadas
-                </p>
-                <h2 className="mt-2 text-xl font-semibold text-ink">
-                  Acumulado que merece atencao
-                </h2>
-              </div>
-
-              <div className="rounded-[1.4rem] bg-[#f8d8cf] px-6 py-8">
-                <p className="text-sm text-ink/60">
-                  Total de cards com prazo vencido e ainda fora de concluido.
-                </p>
-                <p className="mt-4 font-display text-6xl text-ember">
+            {/* Overdue highlight */}
+            <div className="flex flex-col rounded-2xl border border-ember/20 bg-ember/5 p-5 shadow-panel">
+              <p className="text-xs font-semibold uppercase tracking-widest text-ember">
+                Atenção
+              </p>
+              <h2 className="mt-1 text-base font-semibold text-ink">
+                Tasks atrasadas
+              </h2>
+              <div className="mt-6 flex flex-1 flex-col items-center justify-center text-center">
+                <p className="font-display text-7xl font-bold tabular-nums text-ember">
                   {summary.totals.overdueTasks}
                 </p>
-                <p className="mt-4 text-sm leading-6 text-ink/70">
-                  Este total considera a base filtrada pelo periodo informado no topo da pagina e ignora tasks ja concluidas.
+                <p className="mt-3 max-w-[12rem] text-sm text-ink/55">
+                  cards com prazo vencido ainda não concluídos.
                 </p>
               </div>
             </div>
           </div>
         </>
       )}
-    </section>
+    </div>
   );
 }
