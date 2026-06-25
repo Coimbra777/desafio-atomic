@@ -57,27 +57,33 @@ export function DashboardView(): JSX.Element {
   useEffect(() => {
     if (!token) return;
 
+    let cancelled = false;
     const authToken = token;
 
-    async function loadSummary(): Promise<void> {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      try {
-        const payload = await getDashboardSummary(authToken, appliedFilters);
-        setSummary(payload);
-      } catch (loadError) {
-        setError(
-          loadError instanceof Error
-            ? loadError.message
-            : 'Não foi possível carregar o dashboard.',
-        );
-      } finally {
-        setLoading(false);
-      }
-    }
+    getDashboardSummary(authToken, appliedFilters)
+      .then((payload) => {
+        if (!cancelled) {
+          setSummary(payload);
+          setLoading(false);
+        }
+      })
+      .catch((loadError: unknown) => {
+        if (!cancelled) {
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : 'Não foi possível carregar o dashboard.',
+          );
+          setLoading(false);
+        }
+      });
 
-    void loadSummary();
+    return () => {
+      cancelled = true;
+    };
   }, [appliedFilters, token]);
 
   const statusChartData = useMemo(

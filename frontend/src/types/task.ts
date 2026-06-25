@@ -57,12 +57,12 @@ export type UpdateTaskStatusPayload = {
 export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   todo: 'A Fazer',
   in_progress: 'Em Andamento',
-  in_review: 'Em Revisao',
-  done: 'Concluido',
+  in_review: 'Em Revisão',
+  done: 'Concluído',
 };
 
 export const TASK_PRIORITY_LABELS: Record<TaskPriority, string> = {
   low: 'Baixa',
-  medium: 'Media',
+  medium: 'Média',
   high: 'Alta',
 };

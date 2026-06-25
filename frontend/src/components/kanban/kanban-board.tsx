@@ -4,6 +4,9 @@ import {
   type DragEndEvent,
   DndContext,
   DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -84,6 +87,9 @@ function groupTasksByStatus(tasks: Task[]): Record<TaskStatus, Task[]> {
 
 export function KanbanBoard(): JSX.Element {
   const { token, user } = useAuth();
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+  );
   const [tasks, setTasks] = useState<Task[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
@@ -276,6 +282,7 @@ export function KanbanBoard(): JSX.Element {
         </div>
       ) : (
         <DndContext
+          sensors={sensors}
           onDragEnd={(event) => void handleDragEnd(event)}
           onDragStart={(event) => setActiveTaskId(String(event.active.id))}
         >
