@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   type DragEndEvent,
@@ -7,8 +7,8 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core';
-import { useEffect, useMemo, useState } from 'react';
+} from "@dnd-kit/core";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   createTask,
@@ -17,22 +17,22 @@ import {
   getUsers,
   updateTask,
   updateTaskStatus,
-} from '@/lib/api';
-import { useAuth } from '@/lib/auth-context';
-import { Alert } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import type { User } from '@/types/auth';
+} from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import type { User } from "@/types/auth";
 import type {
   CreateTaskPayload,
   Task,
   TaskStatus,
   UpdateTaskPayload,
-} from '@/types/task';
-import { TASK_STATUSES } from '@/types/task';
+} from "@/types/task";
+import { TASK_STATUSES } from "@/types/task";
 
-import { KanbanColumn } from './kanban-column';
-import { TaskCardSurface } from './task-card';
-import { TaskModal } from './task-modal';
+import { KanbanColumn } from "./kanban-column";
+import { TaskCardSurface } from "./task-card";
+import { TaskModal } from "./task-modal";
 
 const columns: Array<{
   status: TaskStatus;
@@ -41,34 +41,32 @@ const columns: Array<{
   dotClassName: string;
 }> = [
   {
-    status: 'todo',
-    label: 'A Fazer',
-    accentClassName: 'text-amber-600',
-    dotClassName: 'bg-amber-400',
+    status: "todo",
+    label: "A Fazer",
+    accentClassName: "text-amber-600",
+    dotClassName: "bg-amber-400",
   },
   {
-    status: 'in_progress',
-    label: 'Em Andamento',
-    accentClassName: 'text-pine',
-    dotClassName: 'bg-pine',
+    status: "in_progress",
+    label: "Em Andamento",
+    accentClassName: "text-pine",
+    dotClassName: "bg-pine",
   },
   {
-    status: 'in_review',
-    label: 'Em Revisão',
-    accentClassName: 'text-purple-600',
-    dotClassName: 'bg-purple-500',
+    status: "in_review",
+    label: "Em Revisão",
+    accentClassName: "text-purple-600",
+    dotClassName: "bg-purple-500",
   },
   {
-    status: 'done',
-    label: 'Concluído',
-    accentClassName: 'text-emerald-700',
-    dotClassName: 'bg-emerald-500',
+    status: "done",
+    label: "Concluído",
+    accentClassName: "text-emerald-700",
+    dotClassName: "bg-emerald-500",
   },
 ];
 
-type ModalState =
-  | { mode: 'create'; task: null }
-  | { mode: 'edit'; task: Task };
+type ModalState = { mode: "create"; task: null } | { mode: "edit"; task: Task };
 
 function groupTasksByStatus(tasks: Task[]): Record<TaskStatus, Task[]> {
   return TASK_STATUSES.reduce(
@@ -119,7 +117,7 @@ export function KanbanBoard(): JSX.Element {
         setError(
           loadError instanceof Error
             ? loadError.message
-            : 'Não foi possível carregar o Kanban.',
+            : "Não foi possível carregar o Kanban.",
         );
       } finally {
         setLoading(false);
@@ -132,7 +130,7 @@ export function KanbanBoard(): JSX.Element {
   const groupedTasks = useMemo(() => groupTasksByStatus(tasks), [tasks]);
   const activeTask =
     activeTaskId !== null
-      ? tasks.find((task) => task.id === activeTaskId) ?? null
+      ? (tasks.find((task) => task.id === activeTaskId) ?? null)
       : null;
 
   async function refreshTasks(): Promise<void> {
@@ -147,7 +145,7 @@ export function KanbanBoard(): JSX.Element {
       setError(
         refreshError instanceof Error
           ? refreshError.message
-          : 'Não foi possível atualizar as tasks.',
+          : "Não foi possível atualizar as tasks.",
       );
     } finally {
       setRefreshing(false);
@@ -202,7 +200,7 @@ export function KanbanBoard(): JSX.Element {
       setError(
         moveError instanceof Error
           ? moveError.message
-          : 'Não foi possível mover a task.',
+          : "Não foi possível mover a task.",
       );
     } finally {
       setStatusUpdatingId(null);
@@ -235,7 +233,7 @@ export function KanbanBoard(): JSX.Element {
             Quadro Kanban
           </h1>
           <p className="mt-0.5 text-sm text-ink/50">
-            {tasks.length} task{tasks.length !== 1 ? 's' : ''} no total
+            {tasks.length} task{tasks.length !== 1 ? "s" : ""} no total
           </p>
         </div>
 
@@ -248,12 +246,12 @@ export function KanbanBoard(): JSX.Element {
             onClick={() => void refreshTasks()}
             type="button"
           >
-            {refreshing ? 'Atualizando...' : 'Recarregar'}
+            {refreshing ? "Atualizando..." : "Recarregar"}
           </Button>
           <Button
             variant="primary"
             size="sm"
-            onClick={() => setModalState({ mode: 'create', task: null })}
+            onClick={() => setModalState({ mode: "create", task: null })}
             type="button"
           >
             + Nova task
@@ -267,9 +265,9 @@ export function KanbanBoard(): JSX.Element {
       {/* ── Status update toast ───────────────────────────────────────── */}
       {statusUpdatingId ? (
         <Alert variant="info">
-          Movendo{' '}
+          Movendo{" "}
           <strong>
-            {tasks.find((t) => t.id === statusUpdatingId)?.title ?? 'task'}
+            {tasks.find((t) => t.id === statusUpdatingId)?.title ?? "task"}
           </strong>
           ...
         </Alert>
@@ -294,7 +292,7 @@ export function KanbanBoard(): JSX.Element {
                   accentClassName={column.accentClassName}
                   dotClassName={column.dotClassName}
                   label={column.label}
-                  onSelectTask={(task) => setModalState({ mode: 'edit', task })}
+                  onSelectTask={(task) => setModalState({ mode: "edit", task })}
                   status={column.status}
                   tasks={groupedTasks[column.status]}
                 />
@@ -303,9 +301,7 @@ export function KanbanBoard(): JSX.Element {
           </div>
 
           <DragOverlay>
-            {activeTask ? (
-              <TaskCardSurface dragging task={activeTask} />
-            ) : null}
+            {activeTask ? <TaskCardSurface dragging task={activeTask} /> : null}
           </DragOverlay>
         </DndContext>
       )}

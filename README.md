@@ -127,6 +127,41 @@ npm install
 npm run start:worker
 ```
 
+## Seed de demonstração
+
+Popula o banco com 5 usuários, 25 tasks distribuídas entre todas as colunas e 38 movimentações históricas para alimentar o dashboard.
+
+O seed é idempotente: pode ser executado múltiplas vezes sem duplicar dados (usuários são ignorados se já existem; tasks com a tag `seed` são deletadas e recriadas).
+
+Com Docker (recomendado):
+
+```bash
+docker compose exec api npm run seed
+```
+
+Localmente (banco e env configurados):
+
+```bash
+cd backend && npm run seed
+```
+
+Credenciais criadas:
+
+| Nome         | E-mail                     | Senha         |
+|--------------|----------------------------|---------------|
+| Gabriel      | gabriel@taskflow.dev       | Taskflow@123  |
+| Ana Souza    | ana@taskflow.dev           | Taskflow@123  |
+| Carlos Lima  | carlos@taskflow.dev        | Taskflow@123  |
+| Marina Costa | marina@taskflow.dev        | Taskflow@123  |
+| João Pereira | joao@taskflow.dev          | Taskflow@123  |
+
+Dados gerados:
+
+- 6 tasks em A Fazer (prioridades e prazos variados)
+- 7 tasks Em Andamento (3 atrasadas, 4 no prazo)
+- 5 tasks Em Revisão (2 atrasadas)
+- 7 tasks Concluídas com movimentações históricas espalhadas nos últimos 13 dias (visível no gráfico de conclusões por dia)
+
 ## Comandos uteis
 
 ```bash
