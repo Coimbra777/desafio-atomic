@@ -34,7 +34,7 @@ migrate:
 	docker compose exec api npm run migration:run
 
 seed:
-	@echo "Seed command will be added in a later etapa."
+	docker compose exec api npm run seed
 
 test:
 	docker compose exec api npm run test
