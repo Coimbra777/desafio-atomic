@@ -316,22 +316,21 @@ Ele fica escutando a fila e processa os jobs de notificação.
 
 O worker opera em dois modos:
 
-- **Modo simulado** (padrão): quando `MAIL_ENABLED` não está definido como `true`, o worker registra logs simulando o envio. Nenhuma configuração SMTP é necessária.
-- **Modo real**: quando `MAIL_ENABLED=true` e as variáveis SMTP estão preenchidas, o worker envia e-mails reais via Nodemailer (Mailtrap por padrão).
+- **Modo simulado** (padrão): sem `MAILTRAP_API_TOKEN` configurado, o worker apenas registra logs. Nenhuma conta externa necessária.
+- **Modo real**: com `MAILTRAP_API_TOKEN` preenchido, o worker envia e-mails via Mailtrap HTTP API usando `fetch` nativo.
 
 Para ativar o envio real, configure no `.env`:
 
 ```env
-MAIL_ENABLED=true
-MAIL_HOST=live.smtp.mailtrap.io
-MAIL_PORT=587
-MAIL_USERNAME=api
-MAIL_PASSWORD=sua-senha-aqui
-MAIL_FROM_ADDRESS=hello@demomailtrap.co
-MAIL_FROM_NAME="TaskFlow"
+MAIL_FROM_ADDRESS=hello@seudominio.com
+MAIL_FROM_NAME=TaskFlow
+MAILTRAP_API_TOKEN=seu-token-aqui
+MAILTRAP_API_URL=https://send.api.mailtrap.io/api/send
 ```
 
-Sem essas variáveis, o worker continua funcionando normalmente em modo simulado.
+Sem `MAILTRAP_API_TOKEN`, o worker continua funcionando normalmente em modo simulado.
+
+Jobs com falha (timeout de 10s ou erro HTTP) são reprocessados automaticamente pelo BullMQ com backoff exponencial (3 tentativas, delay inicial de 5s).
 
 ---
 
@@ -438,7 +437,7 @@ Em seguida, veja os logs do worker. Ao mover ou atribuir uma tarefa, o worker de
 - **Token em localStorage**: simples para MVP; em produção, `HttpOnly cookie` seria mais seguro contra XSS.
 - **Sem RBAC**: qualquer usuário autenticado pode editar ou excluir qualquer task.
 - **Delete físico**: tarefas excluídas não vão para lixeira.
-- **Notificações via Mailtrap**: o worker envia e-mails reais quando `MAIL_ENABLED=true`; sem essa flag, apenas loga a simulação. Substituível por qualquer SMTP sem alterar a arquitetura.
+- **Notificações via Mailtrap API**: o worker envia e-mails reais quando `MAILTRAP_API_TOKEN` está configurado; sem o token, apenas loga a simulação. Substituível por qualquer endpoint HTTP sem alterar a arquitetura da fila.
 - **Sem WebSocket**: o Kanban não atualiza em tempo real entre vários usuários.
 - **Dashboard simples**: possui agregações principais, mas ainda não compara períodos.
 - **Migrations no boot**: facilita avaliação local; em produção, o ideal seria rodar migrations em etapa controlada de deploy.
