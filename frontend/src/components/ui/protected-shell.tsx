@@ -39,24 +39,30 @@ export function ProtectedShell({
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-6xl px-6 py-8">
-      <header className="panel-surface flex flex-col gap-6 rounded-[2rem] px-6 py-6 sm:px-8">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <main className="min-h-screen px-4 py-5 sm:px-6 lg:px-8">
+      <header className="panel-surface mx-auto flex w-full max-w-[1500px] flex-col gap-6 rounded-[2rem] px-5 py-5 sm:px-7">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <p className="font-display text-xs uppercase tracking-[0.35em] text-pine">
-              Area autenticada
+            <p className="font-display text-[0.7rem] uppercase tracking-[0.35em] text-pine">
+              Workspace autenticado
             </p>
-            <h1 className="mt-2 font-display text-3xl text-ink">
-              TaskFlow Workspace
+            <h1 className="mt-2 font-display text-3xl text-ink sm:text-4xl">
+              TaskFlow Board
             </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/60">
+              Fluxo simples de trabalho com autenticacao, Kanban, dashboard e notificacoes assincronas.
+            </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="rounded-full border border-ink/10 bg-white/70 px-4 py-2 text-sm text-ink/75">
-              {user.name} · {user.email}
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="rounded-[1.25rem] border border-ink/10 bg-[#f8fafb] px-4 py-3 text-sm text-ink/75">
+              <p className="font-semibold text-ink">{user.name}</p>
+              <p className="mt-1 text-xs uppercase tracking-[0.18em] text-ink/45">
+                {user.email}
+              </p>
             </div>
             <button
-              className="rounded-full border border-ink/10 px-4 py-2 text-sm font-semibold text-ink transition hover:bg-white/70"
+              className="rounded-[1.1rem] border border-ink/10 bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-sand/35"
               onClick={() => signOut()}
               type="button"
             >
@@ -72,10 +78,10 @@ export function ProtectedShell({
             return (
               <Link
                 key={link.href}
-                className={`rounded-full px-4 py-2 text-sm font-display uppercase tracking-[0.18em] transition ${
+                className={`rounded-[1.1rem] px-4 py-3 text-sm font-display uppercase tracking-[0.18em] transition ${
                   isActive
-                    ? 'bg-ink text-white'
-                    : 'border border-ink/10 bg-white/60 text-ink hover:bg-white'
+                    ? 'bg-pine text-white shadow-card'
+                    : 'border border-ink/10 bg-white text-ink hover:bg-sand/35'
                 }`}
                 href={link.href}
               >
@@ -86,7 +92,7 @@ export function ProtectedShell({
         </nav>
       </header>
 
-      <div className="mt-8">{children}</div>
+      <div className="mx-auto mt-6 w-full max-w-[1500px]">{children}</div>
     </main>
   );
 }

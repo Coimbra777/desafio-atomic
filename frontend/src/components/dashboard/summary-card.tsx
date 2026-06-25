@@ -14,7 +14,7 @@ export function SummaryCard({
   toneClassName,
 }: SummaryCardProps): JSX.Element {
   return (
-    <div className="panel-surface rounded-[1.75rem] px-5 py-5">
+    <div className="panel-surface rounded-[1.4rem] px-5 py-5">
       <p className={`font-display text-xs uppercase tracking-[0.28em] ${toneClassName}`}>
         {eyebrow}
       </p>

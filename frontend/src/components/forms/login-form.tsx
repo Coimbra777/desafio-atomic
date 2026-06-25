@@ -1,20 +1,26 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { FormEvent, useState } from 'react';
+import Link from "next/link";
+import { FormEvent, useState } from "react";
 
-import { useAuth } from '@/lib/auth-context';
+import { useAuth } from "@/lib/auth-context";
 
-import { AuthCard } from '../ui/auth-card';
+import { AuthCard } from "../ui/auth-card";
 
-export function LoginForm(): JSX.Element {
+type LoginFormProps = {
+  onToggleToRegister: () => void;
+};
+
+export function LoginForm({ onToggleToRegister }: LoginFormProps): JSX.Element {
   const { signIn, status } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ): Promise<void> {
     event.preventDefault();
     setError(null);
     setIsSubmitting(true);
@@ -28,7 +34,7 @@ export function LoginForm(): JSX.Element {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : 'Nao foi possivel fazer login.',
+          : "Não foi possível fazer login. Tente novamente.",
       );
     } finally {
       setIsSubmitting(false);
@@ -38,14 +44,18 @@ export function LoginForm(): JSX.Element {
   return (
     <AuthCard
       eyebrow="TaskFlow"
-      title="Entre na sua area"
-      description="Use sua conta para acessar as paginas protegidas do MVP."
+      title="Entre em sua conta"
+      description="Use seu e-mail e senha para acessar a sua conta."
       footer={
         <p className="text-sm text-ink/70">
-          Ainda nao tem conta?{' '}
-          <Link className="font-semibold text-pine" href="/register">
-            Criar cadastro
-          </Link>
+          Ainda não tem conta?{" "}
+          <button
+            className="font-semibold text-pine hover:text-pine/80 transition"
+            onClick={onToggleToRegister}
+            type="button"
+          >
+            Criar nova conta
+          </button>
         </p>
       }
     >
@@ -71,7 +81,7 @@ export function LoginForm(): JSX.Element {
           <input
             className="rounded-2xl border border-ink/10 bg-white/80 px-4 py-3 outline-none transition focus:border-pine"
             type="password"
-            placeholder="Sua senha"
+            placeholder="Digite sua senha"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
@@ -87,13 +97,12 @@ export function LoginForm(): JSX.Element {
 
         <button
           className="rounded-full bg-pine px-5 py-3 font-display text-sm uppercase tracking-[0.18em] text-white transition hover:bg-pine/90 disabled:cursor-not-allowed disabled:opacity-60"
-          disabled={isSubmitting || status === 'loading'}
+          disabled={isSubmitting || status === "loading"}
           type="submit"
         >
-          {isSubmitting ? 'Entrando...' : 'Entrar'}
+          {isSubmitting ? "Entrando..." : "Fazer login"}
         </button>
       </form>
     </AuthCard>
   );
 }
-

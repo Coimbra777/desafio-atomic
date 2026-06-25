@@ -1,11 +1,10 @@
-import { AuthPageGuard } from '@/components/ui/auth-page-guard';
-import { LoginForm } from '@/components/forms/login-form';
+import { AuthPageGuard } from "@/components/ui/auth-page-guard";
+import { AuthToggle } from "@/components/forms/auth-toggle";
 
 export default function LoginPage(): JSX.Element {
   return (
     <AuthPageGuard>
-      <LoginForm />
+      <AuthToggle />
     </AuthPageGuard>
   );
 }
-

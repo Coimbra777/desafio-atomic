@@ -3,23 +3,40 @@ import type {
   LoginPayload,
   RegisterPayload,
   User,
-} from '@/types/auth';
+} from "@/types/auth";
 import type {
   DashboardSummary,
   DashboardSummaryFilters,
-} from '@/types/dashboard';
+} from "@/types/dashboard";
 import type {
   CreateTaskPayload,
   Task,
   TaskMovement,
   UpdateTaskPayload,
   UpdateTaskStatusPayload,
-} from '@/types/task';
+} from "@/types/task";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+
+const ERROR_MESSAGE_MAP: Record<string, string> = {
+  "Invalid credentials":
+    "E-mail ou senha incorretos. Verifique os dados e tente novamente.",
+  "User already exists":
+    "Este e-mail já está cadastrado. Tente fazer login ou usar outro e-mail.",
+  "Email already exists":
+    "Este e-mail já está cadastrado. Tente fazer login ou usar outro e-mail.",
+  "Not found": "Recurso não encontrado.",
+  Unauthorized: "Você não está autorizado a realizar esta ação.",
+  Forbidden: "Acesso negado.",
+  "Bad request": "Dados inválidos. Verifique e tente novamente.",
+};
+
+function mapErrorMessage(originalMessage: string): string {
+  return ERROR_MESSAGE_MAP[originalMessage] ?? originalMessage;
+}
 
 type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method?: "GET" | "POST" | "PATCH" | "DELETE";
   body?: unknown;
   token?: string;
 };
@@ -29,26 +46,26 @@ async function request<T>(
   options: RequestOptions = {},
 ): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
-    method: options.method ?? 'GET',
+    method: options.method ?? "GET",
     headers: {
-      'Content-Type': 'application/json',
-      ...(options.token
-        ? { Authorization: `Bearer ${options.token}` }
-        : {}),
+      "Content-Type": "application/json",
+      ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
     },
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
   if (!response.ok) {
-    let message = 'Nao foi possivel concluir a requisicao.';
+    let message = "Não foi possível concluir a requisição.";
 
     try {
-      const payload = (await response.json()) as { message?: string | string[] };
+      const payload = (await response.json()) as {
+        message?: string | string[];
+      };
 
       if (Array.isArray(payload.message)) {
-        message = payload.message.join(', ');
-      } else if (typeof payload.message === 'string') {
-        message = payload.message;
+        message = payload.message.map((msg) => mapErrorMessage(msg)).join(", ");
+      } else if (typeof payload.message === "string") {
+        message = mapErrorMessage(payload.message);
       }
     } catch {
       message = `Erro HTTP ${response.status}`;
@@ -65,33 +82,33 @@ async function request<T>(
 }
 
 export function registerUser(payload: RegisterPayload): Promise<User> {
-  return request<User>('/auth/register', {
-    method: 'POST',
+  return request<User>("/auth/register", {
+    method: "POST",
     body: payload,
   });
 }
 
 export function loginUser(payload: LoginPayload): Promise<AuthTokenResponse> {
-  return request<AuthTokenResponse>('/auth/login', {
-    method: 'POST',
+  return request<AuthTokenResponse>("/auth/login", {
+    method: "POST",
     body: payload,
   });
 }
 
 export function getCurrentUser(token: string): Promise<User> {
-  return request<User>('/auth/me', {
+  return request<User>("/auth/me", {
     token,
   });
 }
 
 export function getUsers(token: string): Promise<User[]> {
-  return request<User[]>('/users', {
+  return request<User[]>("/users", {
     token,
   });
 }
 
 export function getTasks(token: string): Promise<Task[]> {
-  return request<Task[]>('/tasks', {
+  return request<Task[]>("/tasks", {
     token,
   });
 }
@@ -100,8 +117,8 @@ export function createTask(
   payload: CreateTaskPayload,
   token: string,
 ): Promise<Task> {
-  return request<Task>('/tasks', {
-    method: 'POST',
+  return request<Task>("/tasks", {
+    method: "POST",
     body: payload,
     token,
   });
@@ -113,7 +130,7 @@ export function updateTask(
   token: string,
 ): Promise<Task> {
   return request<Task>(`/tasks/${id}`, {
-    method: 'PATCH',
+    method: "PATCH",
     body: payload,
     token,
   });
@@ -125,7 +142,7 @@ export function updateTaskStatus(
   token: string,
 ): Promise<Task> {
   return request<Task>(`/tasks/${id}/status`, {
-    method: 'PATCH',
+    method: "PATCH",
     body: payload,
     token,
   });
@@ -133,7 +150,7 @@ export function updateTaskStatus(
 
 export function deleteTask(id: string, token: string): Promise<void> {
   return request<void>(`/tasks/${id}`, {
-    method: 'DELETE',
+    method: "DELETE",
     token,
   });
 }
@@ -154,17 +171,17 @@ export function getDashboardSummary(
   const searchParams = new URLSearchParams();
 
   if (filters.startDate) {
-    searchParams.set('startDate', filters.startDate);
+    searchParams.set("startDate", filters.startDate);
   }
 
   if (filters.endDate) {
-    searchParams.set('endDate', filters.endDate);
+    searchParams.set("endDate", filters.endDate);
   }
 
   const query = searchParams.toString();
 
   return request<DashboardSummary>(
-    `/dashboard/summary${query.length > 0 ? `?${query}` : ''}`,
+    `/dashboard/summary${query.length > 0 ? `?${query}` : ""}`,
     {
       token,
     },

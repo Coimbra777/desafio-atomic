@@ -13,9 +13,9 @@ type TaskCardSurfaceProps = {
 };
 
 const priorityClasses: Record<TaskPriority, string> = {
-  low: 'bg-mist/60 text-pine',
-  medium: 'bg-sand/70 text-ink',
-  high: 'bg-ember/15 text-ember',
+  low: 'bg-[#dceae5] text-pine',
+  medium: 'bg-[#f2e4c7] text-[#6f5131]',
+  high: 'bg-[#f8d8cf] text-ember',
 };
 
 function formatDueDate(value: string | null): string | null {
@@ -41,21 +41,25 @@ export function TaskCardSurface({
 
   return (
     <button
-      className={`panel-surface flex w-full flex-col gap-4 rounded-[1.5rem] px-4 py-4 text-left transition ${
-        dragging ? 'cursor-grabbing opacity-80 shadow-card' : 'cursor-pointer hover:-translate-y-0.5'
+      className={`panel-surface flex w-full flex-col gap-3 rounded-[1rem] px-4 py-3 text-left transition ${
+        dragging
+          ? 'cursor-grabbing opacity-80 shadow-card'
+          : 'cursor-pointer hover:-translate-y-0.5 hover:shadow-card'
       }`}
       onClick={onSelect ? () => onSelect(task) : undefined}
       type="button"
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-display text-[0.65rem] uppercase tracking-[0.25em] text-ink/45">
+          <p className="font-display text-[0.62rem] uppercase tracking-[0.24em] text-ink/45">
             {TASK_STATUS_LABELS[task.status]}
           </p>
-          <h3 className="mt-2 text-base font-semibold text-ink">{task.title}</h3>
+          <h3 className="mt-1.5 text-[0.98rem] font-semibold leading-6 text-ink">
+            {task.title}
+          </h3>
         </div>
         <span
-          className={`rounded-full px-3 py-1 text-[0.65rem] font-display uppercase tracking-[0.18em] ${
+          className={`rounded-full px-2.5 py-1 text-[0.62rem] font-display uppercase tracking-[0.16em] ${
             priorityClasses[task.priority]
           }`}
         >
@@ -64,7 +68,7 @@ export function TaskCardSurface({
       </div>
 
       {task.description ? (
-        <p className="text-sm leading-6 text-ink/75">
+        <p className="line-clamp-3 text-sm leading-6 text-ink/72">
           {task.description}
         </p>
       ) : (
@@ -76,7 +80,7 @@ export function TaskCardSurface({
           task.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full border border-ink/10 bg-white/80 px-3 py-1 text-xs text-ink/70"
+              className="rounded-full border border-ink/10 bg-[#f6f7f9] px-2.5 py-1 text-[0.7rem] text-ink/68"
             >
               #{tag}
             </span>
@@ -88,15 +92,19 @@ export function TaskCardSurface({
         )}
       </div>
 
-      <div className="flex flex-col gap-2 text-sm text-ink/70">
+      <div className="grid gap-2 rounded-[0.9rem] bg-[#f7f8fa] px-3 py-3 text-sm text-ink/68">
         <div className="flex items-center justify-between gap-3">
-          <span>Responsavel</span>
+          <span className="text-xs uppercase tracking-[0.14em] text-ink/44">
+            Responsavel
+          </span>
           <span className="font-medium text-ink">
             {task.assignee?.name ?? 'Nao atribuido'}
           </span>
         </div>
         <div className="flex items-center justify-between gap-3">
-          <span>Entrega</span>
+          <span className="text-xs uppercase tracking-[0.14em] text-ink/44">
+            Entrega
+          </span>
           <span className="font-medium text-ink">
             {dueDateLabel ?? 'Sem prazo'}
           </span>
@@ -124,6 +132,7 @@ export function TaskCard({ task, onSelect }: TaskCardProps): JSX.Element {
   return (
     <div
       ref={setNodeRef}
+      className="touch-none"
       style={{
         transform: CSS.Translate.toString(transform),
       }}

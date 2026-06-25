@@ -220,11 +220,11 @@ export function TaskModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/45 px-4 py-8 backdrop-blur-sm">
-      <div className="panel-surface w-full max-w-5xl rounded-[2rem] p-5 sm:p-6">
-        <div className="flex flex-col gap-4 border-b border-ink/10 pb-5 md:flex-row md:items-start md:justify-between">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[rgba(20,27,31,0.4)] px-4 py-8 backdrop-blur-sm">
+      <div className="panel-surface w-full max-w-6xl rounded-[2rem] p-5 sm:p-6">
+        <div className="flex flex-col gap-4 border-b border-ink/10 pb-5 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="font-display text-xs uppercase tracking-[0.3em] text-ember">
+            <p className="font-display text-xs uppercase tracking-[0.3em] text-pine">
               {mode === 'create' ? 'Nova task' : 'Editar task'}
             </p>
             <h2 className="mt-2 font-display text-3xl text-ink">
@@ -238,7 +238,7 @@ export function TaskModal({
           </div>
 
           <button
-            className="rounded-full border border-ink/10 px-4 py-2 text-sm font-semibold text-ink transition hover:bg-white/70"
+            className="rounded-[1rem] border border-ink/10 bg-white px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-sand/30"
             onClick={onClose}
             type="button"
           >
@@ -246,14 +246,19 @@ export function TaskModal({
           </button>
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
+        <div className="mt-6 grid gap-6 xl:grid-cols-[1.25fr,0.9fr]">
           <form className="grid gap-4" onSubmit={handleSubmit}>
+            <div className="rounded-[1.4rem] border border-ink/10 bg-[#f8fafb] p-4">
+              <p className="font-display text-xs uppercase tracking-[0.22em] text-ink/55">
+                Conteudo
+              </p>
+              <div className="mt-4 grid gap-4">
             <label className="grid gap-2 text-sm text-ink">
               <span className="font-display text-xs uppercase tracking-[0.2em] text-ink/60">
                 Titulo
               </span>
               <input
-                className="rounded-2xl border border-ink/10 bg-white/80 px-4 py-3 outline-none transition focus:border-pine"
+                className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
                 maxLength={160}
                 onChange={(event) => updateField('title', event.target.value)}
                 required
@@ -266,21 +271,27 @@ export function TaskModal({
                 Descricao
               </span>
               <textarea
-                className="min-h-32 rounded-2xl border border-ink/10 bg-white/80 px-4 py-3 outline-none transition focus:border-pine"
+                className="min-h-32 rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
                 onChange={(event) =>
                   updateField('description', event.target.value)
                 }
                 value={formState.description}
               />
             </label>
+              </div>
+            </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-[1.4rem] border border-ink/10 bg-[#f8fafb] p-4">
+              <p className="font-display text-xs uppercase tracking-[0.22em] text-ink/55">
+                Metadados
+              </p>
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
               <label className="grid gap-2 text-sm text-ink">
                 <span className="font-display text-xs uppercase tracking-[0.2em] text-ink/60">
                   Prioridade
                 </span>
                 <select
-                  className="rounded-2xl border border-ink/10 bg-white/80 px-4 py-3 outline-none transition focus:border-pine"
+                  className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
                   onChange={(event) =>
                     updateField('priority', event.target.value as TaskPriority)
                   }
@@ -299,7 +310,7 @@ export function TaskModal({
                   Responsavel
                 </span>
                 <select
-                  className="rounded-2xl border border-ink/10 bg-white/80 px-4 py-3 outline-none transition focus:border-pine"
+                  className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
                   onChange={(event) => updateField('assigneeId', event.target.value)}
                   value={formState.assigneeId}
                 >
@@ -311,15 +322,15 @@ export function TaskModal({
                   ))}
                 </select>
               </label>
-            </div>
+              </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
               <label className="grid gap-2 text-sm text-ink">
                 <span className="font-display text-xs uppercase tracking-[0.2em] text-ink/60">
                   Data de entrega
                 </span>
                 <input
-                  className="rounded-2xl border border-ink/10 bg-white/80 px-4 py-3 outline-none transition focus:border-pine"
+                  className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
                   onChange={(event) => updateField('dueDate', event.target.value)}
                   type="datetime-local"
                   value={formState.dueDate}
@@ -331,12 +342,13 @@ export function TaskModal({
                   Tags
                 </span>
                 <input
-                  className="rounded-2xl border border-ink/10 bg-white/80 px-4 py-3 outline-none transition focus:border-pine"
+                  className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
                   onChange={(event) => updateField('tags', event.target.value)}
                   placeholder="frontend, mvp, backlog"
                   value={formState.tags}
                 />
               </label>
+            </div>
             </div>
 
             {error ? (
@@ -354,10 +366,10 @@ export function TaskModal({
                 )}
               </div>
 
-              <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3">
                 {mode === 'edit' && task ? (
                   <button
-                    className="rounded-full border border-red-200 px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-red-700 transition hover:bg-red-50 disabled:opacity-60"
+                    className="rounded-[1rem] border border-red-200 bg-white px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-red-700 transition hover:bg-red-50 disabled:opacity-60"
                     disabled={submitLoading || deleteLoading}
                     onClick={() => void handleDelete()}
                     type="button"
@@ -367,7 +379,7 @@ export function TaskModal({
                 ) : null}
 
                 <button
-                  className="rounded-full bg-ink px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-white transition hover:bg-ink/90 disabled:opacity-60"
+                  className="rounded-[1rem] bg-pine px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-white transition hover:bg-pine/90 disabled:opacity-60"
                   disabled={submitLoading || deleteLoading}
                   type="submit"
                 >
@@ -382,7 +394,7 @@ export function TaskModal({
           </form>
 
           <aside className="grid gap-4">
-            <div className="rounded-[1.5rem] border border-ink/10 bg-white/60 p-5">
+            <div className="rounded-[1.4rem] border border-ink/10 bg-[#f8fafb] p-5">
               <p className="font-display text-xs uppercase tracking-[0.25em] text-pine">
                 Historico
               </p>
@@ -397,7 +409,7 @@ export function TaskModal({
                   movements.map((movement) => (
                     <div
                       key={movement.id}
-                      className="rounded-[1.25rem] border border-ink/10 bg-white/80 px-4 py-3 text-sm text-ink/75"
+                      className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 text-sm text-ink/75"
                     >
                       <p className="font-semibold text-ink">
                         {movement.fromStatus
@@ -418,7 +430,7 @@ export function TaskModal({
             </div>
 
             {mode === 'edit' && task ? (
-              <div className="rounded-[1.5rem] border border-ink/10 bg-white/60 p-5 text-sm text-ink/70">
+              <div className="rounded-[1.4rem] border border-ink/10 bg-[#f8fafb] p-5 text-sm text-ink/70">
                 <p className="font-display text-xs uppercase tracking-[0.25em] text-ember">
                   Resumo
                 </p>

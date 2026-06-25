@@ -128,12 +128,12 @@ export function DashboardView(): JSX.Element {
 
   return (
     <section className="grid gap-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="panel-surface flex flex-col gap-5 rounded-[2rem] px-5 py-5 lg:flex-row lg:items-end lg:justify-between lg:px-6">
         <div>
           <p className="font-display text-xs uppercase tracking-[0.3em] text-pine">
             Dashboard analitico
           </p>
-          <h1 className="mt-2 font-display text-4xl text-ink">
+          <h1 className="mt-2 font-display text-3xl text-ink sm:text-4xl">
             Panorama simples do fluxo
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-ink/70">
@@ -141,13 +141,13 @@ export function DashboardView(): JSX.Element {
           </p>
         </div>
 
-        <div className="panel-surface grid gap-4 rounded-[1.75rem] px-5 py-5 sm:grid-cols-3">
+        <div className="soft-board grid gap-4 rounded-[1.5rem] px-4 py-4 sm:grid-cols-3">
           <label className="grid gap-2 text-sm text-ink">
             <span className="font-display text-xs uppercase tracking-[0.2em] text-ink/60">
               Data inicial
             </span>
             <input
-              className="rounded-2xl border border-ink/10 bg-white/80 px-4 py-3 outline-none transition focus:border-pine"
+              className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
               onChange={(event) => updateFilter('startDate', event.target.value)}
               type="date"
               value={filters.startDate}
@@ -159,7 +159,7 @@ export function DashboardView(): JSX.Element {
               Data final
             </span>
             <input
-              className="rounded-2xl border border-ink/10 bg-white/80 px-4 py-3 outline-none transition focus:border-pine"
+              className="rounded-[1rem] border border-ink/10 bg-white px-4 py-3 outline-none transition focus:border-pine"
               onChange={(event) => updateFilter('endDate', event.target.value)}
               type="date"
               value={filters.endDate}
@@ -168,14 +168,14 @@ export function DashboardView(): JSX.Element {
 
           <div className="flex flex-wrap items-end gap-3">
             <button
-              className="rounded-full bg-ink px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-white transition hover:bg-ink/90"
+              className="rounded-[1rem] bg-pine px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-white transition hover:bg-pine/90"
               onClick={applyFilters}
               type="button"
             >
               Aplicar
             </button>
             <button
-              className="rounded-full border border-ink/10 px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-ink transition hover:bg-white/70"
+              className="rounded-[1rem] border border-ink/10 bg-white px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-ink transition hover:bg-sand/35"
               onClick={clearFilters}
               type="button"
             >
@@ -229,7 +229,7 @@ export function DashboardView(): JSX.Element {
           </div>
 
           <div className="grid gap-6 xl:grid-cols-[1.05fr,0.95fr]">
-            <div className="panel-surface rounded-[2rem] px-5 py-5">
+            <div className="panel-surface rounded-[1.75rem] px-5 py-5">
               <div className="mb-4">
                 <p className="font-display text-xs uppercase tracking-[0.25em] text-ember">
                   Cards por status
@@ -259,7 +259,7 @@ export function DashboardView(): JSX.Element {
               </div>
             </div>
 
-            <div className="panel-surface rounded-[2rem] px-5 py-5">
+            <div className="panel-surface rounded-[1.75rem] px-5 py-5">
               <div className="mb-4">
                 <p className="font-display text-xs uppercase tracking-[0.25em] text-pine">
                   Tarefas por responsavel
@@ -284,7 +284,7 @@ export function DashboardView(): JSX.Element {
           </div>
 
           <div className="grid gap-6 xl:grid-cols-[1.05fr,0.95fr]">
-            <div className="panel-surface rounded-[2rem] px-5 py-5">
+            <div className="panel-surface rounded-[1.75rem] px-5 py-5">
               <div className="mb-4">
                 <p className="font-display text-xs uppercase tracking-[0.25em] text-ink/70">
                   Conclusoes por dia
@@ -318,7 +318,7 @@ export function DashboardView(): JSX.Element {
               </div>
             </div>
 
-            <div className="panel-surface rounded-[2rem] px-5 py-5">
+            <div className="panel-surface rounded-[1.75rem] px-5 py-5">
               <div className="mb-4">
                 <p className="font-display text-xs uppercase tracking-[0.25em] text-ember">
                   Tasks atrasadas
@@ -328,7 +328,7 @@ export function DashboardView(): JSX.Element {
                 </h2>
               </div>
 
-              <div className="rounded-[1.5rem] bg-ember/10 px-6 py-8">
+              <div className="rounded-[1.4rem] bg-[#f8d8cf] px-6 py-8">
                 <p className="text-sm text-ink/60">
                   Total de cards com prazo vencido e ainda fora de concluido.
                 </p>

@@ -30,30 +30,32 @@ export function KanbanColumn({
   return (
     <section
       ref={setNodeRef}
-      className={`panel-surface flex min-h-[28rem] flex-col rounded-[2rem] border px-4 py-4 transition sm:px-5 ${
-        isOver ? 'border-pine bg-white/95 shadow-card' : 'border-transparent'
+      className={`soft-board flex w-[300px] min-w-[300px] max-w-[300px] flex-col rounded-[1.4rem] px-3 py-3 transition ${
+        isOver ? 'border-pine bg-[#eef6f2] shadow-card' : 'border-transparent'
       }`}
     >
-      <div className="mb-4 flex items-center justify-between gap-3 px-1">
+      <div className="mb-3 flex items-center justify-between gap-3 px-2 py-1">
         <div>
-          <p className={`font-display text-xs uppercase tracking-[0.28em] ${accentClassName}`}>
+          <p className={`font-display text-[0.7rem] uppercase tracking-[0.28em] ${accentClassName}`}>
             {label}
           </p>
-          <p className="mt-2 text-sm text-ink/60">{tasks.length} task(s)</p>
+          <p className="mt-2 text-sm text-ink/55">{tasks.length} card(s)</p>
         </div>
-        <div className="rounded-full border border-ink/10 bg-white/80 px-3 py-1 text-sm font-semibold text-ink">
+        <div className="rounded-full border border-ink/10 bg-white px-3 py-1 text-sm font-semibold text-ink shadow-sm">
           {tasks.length}
         </div>
       </div>
 
-      <div className="grid flex-1 content-start gap-4">
+      <div className="board-scroll grid max-h-[calc(100vh-18rem)] flex-1 content-start gap-3 overflow-y-auto pr-1">
         {tasks.length > 0 ? (
           tasks.map((task) => (
             <TaskCard key={task.id} task={task} onSelect={onSelectTask} />
           ))
         ) : (
-          <div className="flex h-full min-h-40 items-center justify-center rounded-[1.5rem] border border-dashed border-ink/10 bg-white/50 px-4 text-center text-sm text-ink/45">
-            Solte uma task aqui ou crie uma nova para esta etapa.
+          <div className="flex min-h-40 items-center justify-center rounded-[1.2rem] border border-dashed border-ink/12 bg-white/75 px-4 text-center text-sm leading-6 text-ink/45">
+            Nenhum card nesta coluna.
+            <br />
+            Arraste um item para ca ou crie uma task nova.
           </div>
         )}
       </div>

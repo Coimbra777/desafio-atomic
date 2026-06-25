@@ -233,22 +233,22 @@ export function KanbanBoard(): JSX.Element {
 
   return (
     <section className="grid gap-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="panel-surface flex flex-col gap-5 rounded-[2rem] px-5 py-5 lg:flex-row lg:items-end lg:justify-between lg:px-6">
         <div>
-          <p className="font-display text-xs uppercase tracking-[0.3em] text-ember">
-            Kanban MVP
+          <p className="font-display text-xs uppercase tracking-[0.3em] text-pine">
+            Board visual
           </p>
-          <h1 className="mt-2 font-display text-4xl text-ink">
-            Fluxo real de tasks
+          <h1 className="mt-2 font-display text-3xl text-ink sm:text-4xl">
+            Kanban inspirado em board horizontal
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-ink/70">
-            Crie cards, atribua responsaveis, arraste entre colunas e acompanhe o historico de movimentacoes sem sair da tela.
+            Crie cards, atribua responsaveis, arraste entre colunas e acompanhe o historico sem sair do fluxo principal.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-3">
           <button
-            className="rounded-full border border-ink/10 px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-ink transition hover:bg-white/70 disabled:opacity-60"
+            className="rounded-[1.1rem] border border-ink/10 bg-white px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-ink transition hover:bg-sand/35 disabled:opacity-60"
             disabled={loading || refreshing}
             onClick={() => void refreshTasks()}
             type="button"
@@ -256,7 +256,7 @@ export function KanbanBoard(): JSX.Element {
             {refreshing ? 'Atualizando...' : 'Recarregar'}
           </button>
           <button
-            className="rounded-full bg-ember px-5 py-3 text-sm font-display uppercase tracking-[0.18em] text-white transition hover:bg-ember/90"
+            className="rounded-[1.1rem] bg-pine px-6 py-3 text-sm font-display uppercase tracking-[0.18em] text-white shadow-card transition hover:bg-pine/90"
             onClick={() => setModalState({ mode: 'create', task: null })}
             type="button"
           >
@@ -269,7 +269,7 @@ export function KanbanBoard(): JSX.Element {
         {columns.map((column) => (
           <div
             key={column.status}
-            className="rounded-[1.75rem] border border-ink/8 bg-white/35 px-4 py-4 backdrop-blur-sm"
+            className="rounded-[1.5rem] border border-ink/8 bg-white/55 px-4 py-4 backdrop-blur-sm"
           >
             <p className={`font-display text-xs uppercase tracking-[0.25em] ${column.accentClassName}`}>
               {column.label}
@@ -296,7 +296,8 @@ export function KanbanBoard(): JSX.Element {
           onDragEnd={(event) => void handleDragEnd(event)}
           onDragStart={(event) => setActiveTaskId(String(event.active.id))}
         >
-          <div className="grid gap-5 xl:grid-cols-4">
+          <div className="soft-board board-scroll overflow-x-auto rounded-[2rem] p-4">
+            <div className="flex min-w-max items-start gap-5">
             {columns.map((column) => (
               <KanbanColumn
                 key={column.status}
@@ -307,6 +308,7 @@ export function KanbanBoard(): JSX.Element {
                 tasks={groupedTasks[column.status]}
               />
             ))}
+            </div>
           </div>
 
           <DragOverlay>
@@ -316,7 +318,7 @@ export function KanbanBoard(): JSX.Element {
       )}
 
       {statusUpdatingId ? (
-        <div className="rounded-[1.5rem] border border-ink/10 bg-white/75 px-5 py-4 text-sm text-ink/65">
+        <div className="rounded-[1.5rem] border border-ink/10 bg-white/80 px-5 py-4 text-sm text-ink/65">
           Atualizando status de{' '}
           <span className="font-semibold text-ink">
             {tasks.find((task) => task.id === statusUpdatingId)?.title ?? 'task'}
