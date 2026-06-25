@@ -193,9 +193,10 @@ export function KanbanBoard(): JSX.Element {
         { status: nextStatus },
         token,
       );
-      setTasks((current) =>
-        current.map((task) => (task.id === taskId ? updatedTask : task)),
-      );
+      setTasks((current) => [
+        updatedTask,
+        ...current.filter((task) => task.id !== taskId),
+      ]);
     } catch (moveError) {
       setError(
         moveError instanceof Error
