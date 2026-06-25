@@ -5,4 +5,3 @@ export type PublicUser = {
   createdAt: string;
   updatedAt: string;
 };
-

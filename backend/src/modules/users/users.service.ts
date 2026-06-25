@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 
-import { User } from './entities/user.entity';
-import { PublicUser } from './users.types';
+import { User } from "./entities/user.entity";
+import { PublicUser } from "./users.types";
 
 type CreateUserInput = {
   name: string;
@@ -27,7 +27,7 @@ export class UsersService {
   async findAll(): Promise<User[]> {
     return this.usersRepository.find({
       order: {
-        createdAt: 'ASC',
+        createdAt: "ASC",
       },
     });
   }
@@ -62,4 +62,3 @@ export class UsersService {
     return users.map((user) => this.toPublic(user));
   }
 }
-

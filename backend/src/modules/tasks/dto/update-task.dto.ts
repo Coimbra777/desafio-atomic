@@ -1,4 +1,4 @@
-import { Transform, Type } from 'class-transformer';
+import { Transform, Type } from "class-transformer";
 import {
   ArrayMaxSize,
   IsArray,
@@ -8,10 +8,10 @@ import {
   IsString,
   IsUUID,
   MaxLength,
-} from 'class-validator';
+} from "class-validator";
 
-import { TaskPriority } from '../task-priority.enum';
-import { TaskStatus } from '../task-status.enum';
+import { TaskPriority } from "../task-priority.enum";
+import { TaskStatus } from "../task-status.enum";
 
 function normalizeTags(value: unknown): string[] {
   if (!Array.isArray(value)) {
@@ -19,19 +19,19 @@ function normalizeTags(value: unknown): string[] {
   }
 
   return value
-    .filter((item): item is string => typeof item === 'string')
+    .filter((item): item is string => typeof item === "string")
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
 }
 
 export class UpdateTaskDto {
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
   @IsOptional()
   @IsString()
   @MaxLength(160)
   title?: string;
 
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
   @IsOptional()
   @IsString()
   description?: string | null;
@@ -60,4 +60,3 @@ export class UpdateTaskDto {
   @IsUUID()
   assigneeId?: string | null;
 }
-

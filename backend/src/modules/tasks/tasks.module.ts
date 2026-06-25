@@ -1,12 +1,12 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
-import { NotificationsModule } from '../notifications/notifications.module';
-import { UsersModule } from '../users/users.module';
-import { TaskMovement } from './entities/task-movement.entity';
-import { Task } from './entities/task.entity';
-import { TasksController } from './tasks.controller';
-import { TasksService } from './tasks.service';
+import { NotificationsModule } from "../notifications/notifications.module";
+import { UsersModule } from "../users/users.module";
+import { TaskMovement } from "./entities/task-movement.entity";
+import { Task } from "./entities/task.entity";
+import { TasksController } from "./tasks.controller";
+import { TasksService } from "./tasks.service";
 
 @Module({
   imports: [

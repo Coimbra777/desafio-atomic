@@ -268,7 +268,7 @@ Redis armazena o job
         ↓
 Worker separado consome a fila
         ↓
-Worker simula o envio de e-mail via log
+Worker envia e-mail real (Mailtrap) ou registra log de simulação
 ```
 
 ### Eventos que geram notificações
@@ -314,9 +314,24 @@ O worker é um processo separado da API.
 
 Ele fica escutando a fila e processa os jobs de notificação.
 
-Neste MVP, o worker não envia e-mail real. Ele apenas registra logs simulando o envio.
+O worker opera em dois modos:
 
-Essa decisão deixa o projeto mais simples para rodar localmente, mas mantém a arquitetura pronta para integrar um provider real de e-mail no futuro, como SendGrid, Amazon SES, Mailgun ou SMTP.
+- **Modo simulado** (padrão): quando `MAIL_ENABLED` não está definido como `true`, o worker registra logs simulando o envio. Nenhuma configuração SMTP é necessária.
+- **Modo real**: quando `MAIL_ENABLED=true` e as variáveis SMTP estão preenchidas, o worker envia e-mails reais via Nodemailer (Mailtrap por padrão).
+
+Para ativar o envio real, configure no `.env`:
+
+```env
+MAIL_ENABLED=true
+MAIL_HOST=live.smtp.mailtrap.io
+MAIL_PORT=587
+MAIL_USERNAME=api
+MAIL_PASSWORD=sua-senha-aqui
+MAIL_FROM_ADDRESS=hello@demomailtrap.co
+MAIL_FROM_NAME="TaskFlow"
+```
+
+Sem essas variáveis, o worker continua funcionando normalmente em modo simulado.
 
 ---
 
@@ -399,7 +414,7 @@ Taskflow@123
 
 Crie ou mova uma tarefa no Kanban.
 
-Em seguida, veja os logs do worker. Ao mover ou atribuir uma tarefa, o worker deve registrar uma simulação de envio de e-mail.
+Em seguida, veja os logs do worker. Ao mover ou atribuir uma tarefa, o worker deve registrar `[EmailWorker][mail_sent]` (se `MAIL_ENABLED=true`) ou a simulação de envio.
 
 ---
 
@@ -423,7 +438,7 @@ Em seguida, veja os logs do worker. Ao mover ou atribuir uma tarefa, o worker de
 - **Token em localStorage**: simples para MVP; em produção, `HttpOnly cookie` seria mais seguro contra XSS.
 - **Sem RBAC**: qualquer usuário autenticado pode editar ou excluir qualquer task.
 - **Delete físico**: tarefas excluídas não vão para lixeira.
-- **Notificações simuladas**: o worker apenas loga o envio; um provider real pode ser adicionado depois.
+- **Notificações via Mailtrap**: o worker envia e-mails reais quando `MAIL_ENABLED=true`; sem essa flag, apenas loga a simulação. Substituível por qualquer SMTP sem alterar a arquitetura.
 - **Sem WebSocket**: o Kanban não atualiza em tempo real entre vários usuários.
 - **Dashboard simples**: possui agregações principais, mas ainda não compara períodos.
 - **Migrations no boot**: facilita avaliação local; em produção, o ideal seria rodar migrations em etapa controlada de deploy.

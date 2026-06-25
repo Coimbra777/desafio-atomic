@@ -1,23 +1,19 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 
-import { AuthenticatedUser } from '../auth/types/authenticated-user.type';
-import { NotificationsPublisherService } from '../notifications/notifications-publisher.service';
-import { User } from '../users/entities/user.entity';
-import { UsersService } from '../users/users.service';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
-import { TaskPriority } from './task-priority.enum';
-import { TaskStatus } from './task-status.enum';
-import { TaskMovement } from './entities/task-movement.entity';
-import { Task } from './entities/task.entity';
-import { TaskMovementResponse, TaskResponse } from './tasks.types';
+import { AuthenticatedUser } from "../auth/types/authenticated-user.type";
+import { NotificationsPublisherService } from "../notifications/notifications-publisher.service";
+import { User } from "../users/entities/user.entity";
+import { UsersService } from "../users/users.service";
+import { CreateTaskDto } from "./dto/create-task.dto";
+import { UpdateTaskStatusDto } from "./dto/update-task-status.dto";
+import { UpdateTaskDto } from "./dto/update-task.dto";
+import { TaskPriority } from "./task-priority.enum";
+import { TaskStatus } from "./task-status.enum";
+import { TaskMovement } from "./entities/task-movement.entity";
+import { Task } from "./entities/task.entity";
+import { TaskMovementResponse, TaskResponse } from "./tasks.types";
 
 @Injectable()
 export class TasksService {
@@ -39,7 +35,7 @@ export class TasksService {
         creator: true,
       },
       order: {
-        createdAt: 'DESC',
+        createdAt: "DESC",
       },
     });
 
@@ -72,16 +68,20 @@ export class TasksService {
     const taskWithRelations = await this.findTaskEntityOrFail(createdTask.id);
 
     if (taskWithRelations.assignee) {
-      this.notificationsPublisherService.publishTaskAssigned({
-        type: 'task-assigned',
-        recipientEmail: taskWithRelations.assignee.email,
-        recipientName: taskWithRelations.assignee.name,
-        taskId: taskWithRelations.id,
-        taskTitle: taskWithRelations.title,
-        assignedByEmail: taskWithRelations.creator.email,
-      }).catch((err: unknown) => {
-        this.logger.warn(`[task:${taskWithRelations.id}] Falha ao enfileirar notificacao task-assigned: ${String(err)}`);
-      });
+      this.notificationsPublisherService
+        .publishTaskAssigned({
+          type: "task-assigned",
+          recipientEmail: taskWithRelations.assignee.email,
+          recipientName: taskWithRelations.assignee.name,
+          taskId: taskWithRelations.id,
+          taskTitle: taskWithRelations.title,
+          assignedByEmail: taskWithRelations.creator.email,
+        })
+        .catch((err: unknown) => {
+          this.logger.warn(
+            `[task:${taskWithRelations.id}] Falha ao enfileirar notificacao task-assigned: ${String(err)}`,
+          );
+        });
     }
 
     return this.toTaskResponse(taskWithRelations);
@@ -93,7 +93,11 @@ export class TasksService {
     return this.toTaskResponse(task);
   }
 
-  async update(id: string, payload: UpdateTaskDto, authenticatedUser: AuthenticatedUser): Promise<TaskResponse> {
+  async update(
+    id: string,
+    payload: UpdateTaskDto,
+    authenticatedUser: AuthenticatedUser,
+  ): Promise<TaskResponse> {
     const task = await this.findTaskEntityOrFail(id);
     const previousStatus = task.status;
     const previousAssigneeId = task.assigneeId;
@@ -138,18 +142,25 @@ export class TasksService {
 
     const updatedTask = await this.findTaskEntityOrFail(task.id);
 
-    if (payload.assigneeId !== undefined && updatedTask.assigneeId !== previousAssigneeId) {
+    if (
+      payload.assigneeId !== undefined &&
+      updatedTask.assigneeId !== previousAssigneeId
+    ) {
       if (updatedTask.assignee) {
-        this.notificationsPublisherService.publishTaskAssigned({
-          type: 'task-assigned',
-          recipientEmail: updatedTask.assignee.email,
-          recipientName: updatedTask.assignee.name,
-          taskId: updatedTask.id,
-          taskTitle: updatedTask.title,
-          assignedByEmail: updatedTask.creator.email,
-        }).catch((err: unknown) => {
-          this.logger.warn(`[task:${updatedTask.id}] Falha ao enfileirar notificacao task-assigned: ${String(err)}`);
-        });
+        this.notificationsPublisherService
+          .publishTaskAssigned({
+            type: "task-assigned",
+            recipientEmail: updatedTask.assignee.email,
+            recipientName: updatedTask.assignee.name,
+            taskId: updatedTask.id,
+            taskTitle: updatedTask.title,
+            assignedByEmail: updatedTask.creator.email,
+          })
+          .catch((err: unknown) => {
+            this.logger.warn(
+              `[task:${updatedTask.id}] Falha ao enfileirar notificacao task-assigned: ${String(err)}`,
+            );
+          });
       }
     }
 
@@ -167,17 +178,21 @@ export class TasksService {
 
       const recipient = updatedTask.assignee ?? updatedTask.creator;
 
-      this.notificationsPublisherService.publishTaskStatusChanged({
-        type: 'task-status-changed',
-        recipientEmail: recipient.email,
-        recipientName: recipient.name,
-        taskId: updatedTask.id,
-        taskTitle: updatedTask.title,
-        previousStatus,
-        currentStatus: updatedTask.status,
-      }).catch((err: unknown) => {
-        this.logger.warn(`[task:${updatedTask.id}] Falha ao enfileirar notificacao task-status-changed: ${String(err)}`);
-      });
+      this.notificationsPublisherService
+        .publishTaskStatusChanged({
+          type: "task-status-changed",
+          recipientEmail: recipient.email,
+          recipientName: recipient.name,
+          taskId: updatedTask.id,
+          taskTitle: updatedTask.title,
+          previousStatus,
+          currentStatus: updatedTask.status,
+        })
+        .catch((err: unknown) => {
+          this.logger.warn(
+            `[task:${updatedTask.id}] Falha ao enfileirar notificacao task-status-changed: ${String(err)}`,
+          );
+        });
     }
 
     return this.toTaskResponse(updatedTask);
@@ -213,20 +228,25 @@ export class TasksService {
       await this.taskMovementsRepository.save(movement);
 
       const updatedTaskWithRelations = await this.findTaskEntityOrFail(id);
+
       const recipient =
         updatedTaskWithRelations.assignee ?? updatedTaskWithRelations.creator;
 
-      this.notificationsPublisherService.publishTaskStatusChanged({
-        type: 'task-status-changed',
-        recipientEmail: recipient.email,
-        recipientName: recipient.name,
-        taskId: updatedTaskWithRelations.id,
-        taskTitle: updatedTaskWithRelations.title,
-        previousStatus,
-        currentStatus: updatedTaskWithRelations.status,
-      }).catch((err: unknown) => {
-        this.logger.warn(`[task:${updatedTaskWithRelations.id}] Falha ao enfileirar notificacao task-status-changed: ${String(err)}`);
-      });
+      this.notificationsPublisherService
+        .publishTaskStatusChanged({
+          type: "task-status-changed",
+          recipientEmail: recipient.email,
+          recipientName: recipient.name,
+          taskId: updatedTaskWithRelations.id,
+          taskTitle: updatedTaskWithRelations.title,
+          previousStatus,
+          currentStatus: updatedTaskWithRelations.status,
+        })
+        .catch((err: unknown) => {
+          this.logger.warn(
+            `[task:${updatedTaskWithRelations.id}] Falha ao enfileirar notificacao task-status-changed: ${String(err)}`,
+          );
+        });
     }
 
     const updatedTask = await this.findTaskEntityOrFail(id);
@@ -245,7 +265,7 @@ export class TasksService {
         movedBy: true,
       },
       order: {
-        createdAt: 'DESC',
+        createdAt: "DESC",
       },
     });
 
@@ -264,7 +284,7 @@ export class TasksService {
     });
 
     if (!task) {
-      throw new NotFoundException('Task not found.');
+      throw new NotFoundException("Task not found.");
     }
 
     return task;
@@ -274,7 +294,7 @@ export class TasksService {
     const user = await this.usersService.findById(id);
 
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException("User not found.");
     }
 
     return user;
@@ -291,16 +311,16 @@ export class TasksService {
       tags: task.tags,
       assigneeId: task.assigneeId,
       createdById: task.createdById,
-      assignee: task.assignee ? this.usersService.toPublic(task.assignee) : null,
+      assignee: task.assignee
+        ? this.usersService.toPublic(task.assignee)
+        : null,
       creator: this.usersService.toPublic(task.creator),
       createdAt: task.createdAt.toISOString(),
       updatedAt: task.updatedAt.toISOString(),
     };
   }
 
-  private toTaskMovementResponse(
-    movement: TaskMovement,
-  ): TaskMovementResponse {
+  private toTaskMovementResponse(movement: TaskMovement): TaskMovementResponse {
     return {
       id: movement.id,
       taskId: movement.taskId,

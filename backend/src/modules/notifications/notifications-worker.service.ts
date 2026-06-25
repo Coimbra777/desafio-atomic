@@ -1,17 +1,13 @@
-import {
-  Injectable,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Job, Worker } from 'bullmq';
+import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { Job, Worker } from "bullmq";
 
-import { NotificationEvent } from './notification-event.type';
-import { EMAIL_NOTIFICATIONS_QUEUE } from './notifications.constants';
-import { NotificationsProcessor } from './notifications.processor';
+import { NotificationEvent } from "./notification-event.type";
+import { EMAIL_NOTIFICATIONS_QUEUE } from "./notifications.constants";
+import { NotificationsProcessor } from "./notifications.processor";
 
 function parseRedisPort(value?: string): number {
-  const port = Number(value ?? '6379');
+  const port = Number(value ?? "6379");
 
   if (Number.isNaN(port)) {
     return 6379;
@@ -37,19 +33,19 @@ export class NotificationsWorkerService
       (job: Job<NotificationEvent>) => this.notificationsProcessor.process(job),
       {
         connection: {
-          host: this.configService.get<string>('REDIS_HOST', 'redis'),
-          port: parseRedisPort(this.configService.get<string>('REDIS_PORT')),
+          host: this.configService.get<string>("REDIS_HOST", "redis"),
+          port: parseRedisPort(this.configService.get<string>("REDIS_PORT")),
         },
       },
     );
 
-    this.worker.on('completed', (job) => {
+    this.worker.on("completed", (job) => {
       console.log(`[EmailWorker] Job ${job.id} completed.`);
     });
 
-    this.worker.on('failed', (job, error) => {
+    this.worker.on("failed", (job, error) => {
       console.error(
-        `[EmailWorker] Job ${job?.id ?? 'unknown'} failed: ${error.message}`,
+        `[EmailWorker] Job ${job?.id ?? "unknown"} failed: ${error.message}`,
       );
     });
   }
@@ -58,4 +54,3 @@ export class NotificationsWorkerService
     await this.worker?.close();
   }
 }
-

@@ -1,7 +1,7 @@
-import { TaskStatus } from '../tasks/task-status.enum';
+import { TaskStatus } from "../tasks/task-status.enum";
 
 export type TaskAssignedNotificationEvent = {
-  type: 'task-assigned';
+  type: "task-assigned";
   recipientEmail: string;
   recipientName: string;
   taskId: string;
@@ -10,7 +10,7 @@ export type TaskAssignedNotificationEvent = {
 };
 
 export type TaskStatusChangedNotificationEvent = {
-  type: 'task-status-changed';
+  type: "task-status-changed";
   recipientEmail: string;
   recipientName: string;
   taskId: string;
@@ -22,4 +22,3 @@ export type TaskStatusChangedNotificationEvent = {
 export type NotificationEvent =
   | TaskAssignedNotificationEvent
   | TaskStatusChangedNotificationEvent;
-
