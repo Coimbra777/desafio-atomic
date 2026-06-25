@@ -20,9 +20,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 const ERROR_MESSAGE_MAP: Record<string, string> = {
   "Invalid credentials.":
-    "E-mail ou senha incorretos. Verifique os dados e tente novamente.",
+    "Não conseguimos acessar sua conta com esses dados. Verifique a senha ou crie uma conta com este e-mail.",
   "Invalid credentials":
-    "E-mail ou senha incorretos. Verifique os dados e tente novamente.",
+    "Não conseguimos acessar sua conta com esses dados. Verifique a senha ou crie uma conta com este e-mail.",
   "Email is already in use.":
     "Este e-mail já está cadastrado. Tente fazer login ou usar outro e-mail.",
   "User already exists":

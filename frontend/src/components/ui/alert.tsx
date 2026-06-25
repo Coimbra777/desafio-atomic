@@ -1,9 +1,9 @@
-type AlertVariant = 'error' | 'warning' | 'info';
+type AlertVariant = "error" | "warning" | "info";
 
 const styles: Record<AlertVariant, string> = {
-  error: 'border-red-200 bg-red-50 text-red-700',
-  warning: 'border-amber-200 bg-amber-50 text-amber-700',
-  info: 'border-blue-200 bg-blue-50 text-blue-700',
+  error: "border-red-200 bg-red-50 text-red-700",
+  warning: "border-amber-200 bg-amber-50 text-amber-700",
+  info: "border-blue-200 bg-blue-50 text-blue-700",
 };
 
 type AlertProps = {
@@ -14,8 +14,8 @@ type AlertProps = {
 
 export function Alert({
   children,
-  variant = 'error',
-  className = '',
+  variant = "error",
+  className = "",
 }: AlertProps): JSX.Element {
   return (
     <div

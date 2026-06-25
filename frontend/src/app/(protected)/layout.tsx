@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { ProtectedShell } from '@/components/ui/protected-shell';
+import { ProtectedShell } from "@/components/ui/protected-shell";
 
 export default function ProtectedLayout({
   children,
@@ -9,4 +9,3 @@ export default function ProtectedLayout({
 }>): JSX.Element {
   return <ProtectedShell>{children}</ProtectedShell>;
 }
-

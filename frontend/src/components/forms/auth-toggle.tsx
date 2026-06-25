@@ -13,13 +13,26 @@ export function AuthToggle({
   initialMode = "login",
 }: AuthToggleProps): JSX.Element {
   const [mode, setMode] = useState<"login" | "register">(initialMode);
+  const [registrationEmail, setRegistrationEmail] = useState("");
+
+  function goToRegister(email: string): void {
+    setRegistrationEmail(email);
+    setMode("register");
+  }
+
+  function goToLogin(): void {
+    setMode("login");
+  }
 
   return (
     <>
       {mode === "login" ? (
-        <LoginForm onToggleToRegister={() => setMode("register")} />
+        <LoginForm onToggleToRegister={goToRegister} />
       ) : (
-        <RegisterForm onToggleToLogin={() => setMode("login")} />
+        <RegisterForm
+          initialEmail={registrationEmail}
+          onToggleToLogin={goToLogin}
+        />
       )}
     </>
   );

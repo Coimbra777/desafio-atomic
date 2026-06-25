@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/lib/auth-context";
 import { Alert } from "@/components/ui/alert";
@@ -9,17 +9,30 @@ import { AuthCard } from "../ui/auth-card";
 
 type RegisterFormProps = {
   onToggleToLogin: () => void;
+  initialEmail?: string;
 };
+
+const EMAIL_TAKEN_MARKER = "já está cadastrado";
 
 export function RegisterForm({
   onToggleToLogin,
+  initialEmail = "",
 }: RegisterFormProps): JSX.Element {
   const { signUp, status } = useAuth();
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
+  // When an email arrives pre-filled from the login form, focus the name field
+  useEffect(() => {
+    if (initialEmail) {
+      nameInputRef.current?.focus();
+    }
+  }, [initialEmail]);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -40,6 +53,8 @@ export function RegisterForm({
       setIsSubmitting(false);
     }
   }
+
+  const isEmailTakenError = error?.includes(EMAIL_TAKEN_MARKER) ?? false;
 
   return (
     <AuthCard
@@ -63,6 +78,7 @@ export function RegisterForm({
         <label className="grid gap-1.5">
           <span className="text-xs font-medium text-ink/60">Nome</span>
           <input
+            ref={nameInputRef}
             className="input-base"
             type="text"
             placeholder="Seu nome completo"
@@ -81,7 +97,10 @@ export function RegisterForm({
             type="email"
             placeholder="voce@exemplo.com"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              setError(null);
+            }}
             autoComplete="email"
             required
           />
@@ -101,7 +120,22 @@ export function RegisterForm({
           />
         </label>
 
-        {error ? <Alert>{error}</Alert> : null}
+        {error ? (
+          isEmailTakenError ? (
+            <Alert>
+              <p>Este e-mail já possui uma conta.</p>
+              <button
+                className="mt-2 inline-flex items-center gap-1 font-semibold text-red-700 underline underline-offset-2 hover:text-red-900"
+                onClick={onToggleToLogin}
+                type="button"
+              >
+                Faça login para continuar →
+              </button>
+            </Alert>
+          ) : (
+            <Alert>{error}</Alert>
+          )
+        ) : null}
 
         <Button
           type="submit"
