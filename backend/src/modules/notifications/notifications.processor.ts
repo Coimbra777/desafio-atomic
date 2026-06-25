@@ -5,6 +5,7 @@ import { Job } from "bullmq";
 import {
   NotificationEvent,
   TaskAssignedNotificationEvent,
+  TaskDueSoonNotificationEvent,
   TaskStatusChangedNotificationEvent,
 } from "./notification-event.type";
 
@@ -65,6 +66,17 @@ export class NotificationsProcessor {
       } else {
         console.log(
           `[EmailWorker][task_status_changed] Sending notification to ${event.recipientEmail}: Task "${event.taskTitle}" changed status to ${event.currentStatus}`,
+        );
+      }
+      return;
+    }
+
+    if (event.type === "task-due-soon") {
+      if (this.apiToken) {
+        await this.sendTaskDueSoon(event);
+      } else {
+        console.log(
+          `[EmailWorker][task_due_soon] Sending notification to ${event.recipientEmail}: Task "${event.taskTitle}" is due on ${event.dueDate}`,
         );
       }
     }
@@ -139,6 +151,26 @@ export class NotificationsProcessor {
     await this.sendMail(event.recipientEmail, subject, text, html);
     console.log(
       `[EmailWorker][mail_sent] task-status-changed → ${event.recipientEmail}`,
+    );
+  }
+
+  private async sendTaskDueSoon(
+    event: TaskDueSoonNotificationEvent,
+  ): Promise<void> {
+    const subject = `Tarefa próxima do vencimento: ${event.taskTitle}`;
+    const text =
+      `Olá, ${event.recipientName}!\n\n` +
+      `A tarefa "${event.taskTitle}" (ID: ${event.taskId}) vence em ${event.dueDate}.\n\n` +
+      `TaskFlow`;
+    const html =
+      `<p>Olá, <strong>${event.recipientName}</strong>!</p>` +
+      `<p>A tarefa <strong>${event.taskTitle}</strong> (ID: <code>${event.taskId}</code>) ` +
+      `vence em <strong>${event.dueDate}</strong>.</p>` +
+      `<p>TaskFlow</p>`;
+
+    await this.sendMail(event.recipientEmail, subject, text, html);
+    console.log(
+      `[EmailWorker][mail_sent] task-due-soon → ${event.recipientEmail}`,
     );
   }
 }

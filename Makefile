@@ -36,5 +36,8 @@ migrate:
 seed:
 	docker compose exec api npm run seed
 
+notify-due-soon:
+	docker compose exec api npm run notify:due-soon
+
 test:
 	docker compose exec api npm run test

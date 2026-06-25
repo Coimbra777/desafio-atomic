@@ -20,7 +20,8 @@
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
     "migration:generate": "npm run typeorm -- migration:generate src/database/migrations/AutoMigration",
-    "seed": "ts-node -r tsconfig-paths/register src/database/seeds/seed.ts"
+    "seed": "ts-node -r tsconfig-paths/register src/database/seeds/seed.ts",
+    "notify:due-soon": "ts-node -r tsconfig-paths/register src/scripts/notify-due-soon.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.20",

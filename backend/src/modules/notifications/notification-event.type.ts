@@ -19,6 +19,16 @@ export type TaskStatusChangedNotificationEvent = {
   currentStatus: TaskStatus;
 };
 
+export type TaskDueSoonNotificationEvent = {
+  type: "task-due-soon";
+  recipientEmail: string;
+  recipientName: string;
+  taskId: string;
+  taskTitle: string;
+  dueDate: string;
+};
+
 export type NotificationEvent =
   | TaskAssignedNotificationEvent
-  | TaskStatusChangedNotificationEvent;
+  | TaskStatusChangedNotificationEvent
+  | TaskDueSoonNotificationEvent;

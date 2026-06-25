@@ -5,6 +5,7 @@ import { Job, Queue } from "bullmq";
 import {
   NotificationEvent,
   TaskAssignedNotificationEvent,
+  TaskDueSoonNotificationEvent,
   TaskStatusChangedNotificationEvent,
 } from "./notification-event.type";
 import { EMAIL_NOTIFICATIONS_QUEUE } from "./notifications.constants";
@@ -51,6 +52,15 @@ export class NotificationsPublisherService implements OnModuleDestroy {
     event: TaskStatusChangedNotificationEvent,
   ): Promise<Job<NotificationEvent>> {
     return this.queue.add("task-status-changed", event);
+  }
+
+  async publishTaskDueSoon(
+    event: TaskDueSoonNotificationEvent,
+  ): Promise<Job<NotificationEvent>> {
+    // jobId determinístico: evita duplicatas para a mesma task no mesmo dia
+    const date = event.dueDate.slice(0, 10);
+    const jobId = `task-due-soon:${event.taskId}:${date}`;
+    return this.queue.add("task-due-soon", event, { jobId });
   }
 
   async onModuleDestroy(): Promise<void> {
