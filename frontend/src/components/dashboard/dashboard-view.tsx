@@ -39,6 +39,15 @@ function formatDateLabel(value: string): string {
   }).format(new Date(`${value}T00:00:00`));
 }
 
+function formatFilterDate(value: string | null): string {
+  if (!value) return '…';
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(`${value}T00:00:00`));
+}
+
 const inputClass =
   'w-full rounded-lg border border-ink/12 bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition focus:border-pine focus:ring-2 focus:ring-pine/15';
 
@@ -221,7 +230,7 @@ export function DashboardView(): JSX.Element {
               toneClassName="text-pine"
               value={
                 summary.filters.startDate ?? summary.filters.endDate
-                  ? `${summary.filters.startDate ?? '…'} até ${summary.filters.endDate ?? '…'}`
+                  ? `${formatFilterDate(summary.filters.startDate)} até ${formatFilterDate(summary.filters.endDate)}`
                   : 'Todos os tempos'
               }
             />
